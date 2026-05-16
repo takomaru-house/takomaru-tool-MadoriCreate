@@ -481,6 +481,16 @@
     font-family: var(--mono); font-size: 11px;
     letter-spacing: 0.1em; color: var(--ink-soft);
   }
+  .blank-notice {
+    background: #f7efd6;
+    border-left: 3px solid #c9a23a;
+    padding: 8px 12px;
+    margin: 0 0 10px;
+    font-size: 12.5px;
+    color: #5a4a1f;
+    line-height: 1.5;
+  }
+  .blank-notice details summary { outline: none; }
   .candidate-pager .name {
     font-family: var(--jp-serif); font-size: 14px;
     letter-spacing: 0; color: var(--ink); font-weight: 500;
@@ -2136,19 +2146,44 @@ function generate() {
   state.currentIdx = 0;
 
   if (state.candidates.length === 0) {
-    const reasons = TEMPLATES.map(t => {
+    // テンプレ未マッチ → 空のキャンバスにフォールバック
+    // 除外理由は state.exclusionReasons に格納(必要なら「詳細を見る」で展開)
+    state.exclusionReasons = TEMPLATES.map(t => {
       const sc = scoreTemplate(t, input);
       return `${t.id}(${t.name}): ${sc.reason || "条件外"}`;
     });
-    state.warnings.push("適合するテンプレートが見つかりませんでした。");
-    state.warnings.push("除外理由:");
-    for (const r of reasons) state.warnings.push("・" + r);
-    state.workingRooms = null; state.workingTemplate = null;
+    const blank = createBlankTemplate(input);
+    state.candidates = [{ template: blank, score: 0, breakdown: ["空のキャンバス(手動配置モード)"] }];
+    state.currentIdx = 0;
+    loadCandidateAsWorking(0);
   } else {
+    state.exclusionReasons = null;
     loadCandidateAsWorking(0);
   }
   renderOutput();
   updateOptionStatus();
+}
+
+// 空のキャンバステンプレートを作成 (テンプレ未マッチ時のフォールバック)
+function createBlankTemplate(input) {
+  const M_PER_GRID = 0.91;
+  const gridW = Math.max(4, Math.round(input.landWidthM / M_PER_GRID));
+  const gridH = Math.max(4, Math.round(input.landHeightM / M_PER_GRID));
+  return {
+    id: "_BLANK_",
+    name: "空のキャンバス(手動配置)",
+    floors: input.floorCount || 2,
+    approach: input.approach,
+    landGridW: gridW,
+    landGridH: gridH,
+    landRangeM: {
+      minW: input.landWidthM, maxW: input.landWidthM,
+      minH: input.landHeightM, maxH: input.landHeightM
+    },
+    rooms: [],
+    variableRooms: [],
+    isBlank: true
+  };
 }
 
 function loadCandidateAsWorking(idx) {
@@ -2175,6 +2210,15 @@ function renderOutput() {
   const choku = calcChokkaritsu(rooms, t.landGridW, t.landGridH, tFloors);
 
   let html = "";
+  // 空のキャンバス時の1行通知(展開可能な除外理由詳細つき)
+  if (t.isBlank) {
+    const detailCount = (state.exclusionReasons || []).length;
+    html += `<div class="blank-notice">⚠ 適合するテンプレートが見つかりませんでした。空のキャンバスを表示しています。「+ 部屋を追加」から間取りを作成してください。`;
+    if (detailCount) {
+      html += ` <details style="display:inline-block;margin-left:10px;"><summary style="cursor:pointer;color:#666;">除外理由(${detailCount}件)</summary><div style="margin-top:6px;font-size:11px;color:#666;max-height:200px;overflow:auto;background:#fafafa;padding:6px;border-radius:3px;">` + state.exclusionReasons.map(r => `<div>・${r}</div>`).join("") + `</div></details>`;
+    }
+    html += `</div>`;
+  }
   html += `<div class="candidate-pager">候補 ${state.currentIdx + 1}/${state.candidates.length} ・ <strong>${t.name}</strong> (${t.id})</div>`;
   // 配置の問題点
   const issues = computeIssues(rooms, t.landGridW, t.landGridH, tFloors);
