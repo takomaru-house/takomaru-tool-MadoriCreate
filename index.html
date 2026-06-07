@@ -471,6 +471,36 @@
   .save-panel-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
   .save-panel-row input[type="text"]:focus { outline: none; border-color: var(--ink); background: #fff; }
   .save-panel-row button { padding: 6px 12px; font-size: 10px; }
+  .save-panel-tools {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    margin: 0 0 10px;
+    padding: 6px 8px;
+    background: rgba(0,0,0,0.02);
+    border: 0.5px dashed var(--rule);
+  }
+  .save-panel-tools button,
+  .save-panel-tools .btn-like {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px;
+    background: transparent; color: var(--ink-soft);
+    border: 0.5px solid var(--rule); border-radius: 0;
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    cursor: pointer;
+    transition: background var(--dur-quick) var(--ease), color var(--dur-quick) var(--ease);
+  }
+  .save-panel-tools button:hover,
+  .save-panel-tools .btn-like:hover {
+    color: var(--ink); border-color: var(--ink); background: transparent;
+  }
+  .save-panel-tools button:disabled {
+    color: var(--ink-soft); opacity: 0.4; cursor: not-allowed;
+  }
+  .save-panel-tools-note {
+    margin-left: auto;
+    font-family: var(--jp-serif); font-size: 11px;
+    color: var(--ink-soft);
+  }
   .save-panel-list { display: flex; flex-direction: column; gap: 0; }
   .saved-row {
     display: flex; align-items: center; justify-content: space-between;
@@ -1099,6 +1129,78 @@ function deleteSavedPlan(id) {
   const next = loadSavedPlans().filter(p => p.id !== id);
   persistSavedPlans(next);
   if (state.saveLoad.loadedFromId === id) state.saveLoad.loadedFromId = null;
+}
+
+// ============ Import / Export (JSON ファイル経由の共有) ============
+const EXPORT_FORMAT_VERSION = "takomaru-madori-v1";
+
+function buildExportPayload(plans) {
+  return {
+    format: EXPORT_FORMAT_VERSION,
+    exportedAt: new Date().toISOString(),
+    plans: plans
+  };
+}
+function downloadJsonFile(payload, fileName) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = fileName;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function sanitizeFileName(s) {
+  return (s || "plan").replace(/[\/\\?%*:|"<>\s]+/g, "_").slice(0, 40);
+}
+function exportSinglePlan(id) {
+  const p = loadSavedPlans().find(x => x.id === id);
+  if (!p) return;
+  const ts = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  downloadJsonFile(buildExportPayload([p]), `madori_${sanitizeFileName(p.name)}_${ts}.json`);
+}
+function exportAllPlans() {
+  const plans = loadSavedPlans();
+  if (plans.length === 0) { alert("エクスポートできる保存データがありません。"); return; }
+  const ts = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  downloadJsonFile(buildExportPayload(plans), `madori_all_${ts}.json`);
+}
+function importPlansFromFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let obj;
+    try { obj = JSON.parse(reader.result); }
+    catch (e) { alert("JSONとして読み取れませんでした: " + e.message); return; }
+    if (!obj || obj.format !== EXPORT_FORMAT_VERSION || !Array.isArray(obj.plans)) {
+      alert(`対応していないファイル形式です。\n期待: ${EXPORT_FORMAT_VERSION}\n受領: ${obj && obj.format}`);
+      return;
+    }
+    const existing = loadSavedPlans();
+    let added = 0, skipped = 0;
+    for (const p of obj.plans) {
+      if (existing.length + added >= MAX_SAVES) { skipped++; continue; }
+      // 衝突回避のため ID は付け直し、createdAt は元データを保持(なければ現在時刻)
+      const newId = "save_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8) + "_imp" + added;
+      const entry = {
+        id: newId,
+        name: (p.name || "(無題)") + " (インポート)",
+        createdAt: p.createdAt || new Date().toISOString(),
+        input: p.input || {},
+        template: p.template || {},
+        rooms: Array.isArray(p.rooms) ? p.rooms : [],
+        buildingPosition: p.buildingPosition || { v: "north", h: "west" }
+      };
+      existing.push(entry);
+      added++;
+    }
+    if (!persistSavedPlans(existing)) return;
+    let msg = `${added}件のプランを取り込みました。`;
+    if (skipped > 0) msg += `\n上限${MAX_SAVES}件のため${skipped}件はスキップしました(既存を削除してから再度取り込んでください)。`;
+    alert(msg);
+    renderOutput();
+  };
+  reader.onerror = () => alert("ファイル読込に失敗しました。");
+  reader.readAsText(file, "utf-8");
 }
 function applySavedPlan(id) {
   const p = loadSavedPlans().find(x => x.id === id);
@@ -2680,6 +2782,7 @@ function buildSavedListHtml() {
       </div>
       <div class="saved-actions">
         <button class="saved-load-btn ghost" data-save-id="${p.id}">読込</button>
+        <button class="saved-exp-btn ghost" data-save-id="${p.id}" title="JSONファイルとして書き出し">出力</button>
         <button class="saved-del-btn ghost" data-save-id="${p.id}">削除</button>
       </div>
     </div>`;
@@ -2688,6 +2791,9 @@ function buildSavedListHtml() {
 function wireSavedListButtons() {
   document.querySelectorAll(".saved-load-btn").forEach(b => {
     b.onclick = () => applySavedPlan(b.dataset.saveId);
+  });
+  document.querySelectorAll(".saved-exp-btn").forEach(b => {
+    b.onclick = () => exportSinglePlan(b.dataset.saveId);
   });
   document.querySelectorAll(".saved-del-btn").forEach(b => {
     b.onclick = () => {
@@ -2700,6 +2806,15 @@ function wireSavedListButtons() {
       }
     };
   });
+  // 一括エクスポート / インポートボタン (パネルにある場合のみ)
+  const expAll = document.getElementById("exportAllBtn");
+  if (expAll) expAll.onclick = exportAllPlans;
+  const impFile = document.getElementById("importPlanFile");
+  if (impFile) impFile.onchange = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (f) importPlansFromFile(f);
+    e.target.value = ""; // 同じファイルを再選択できるようにクリア
+  };
 }
 
 function renderOutput() {
@@ -2713,12 +2828,17 @@ function renderOutput() {
       <span class="em-en">Press Generate to draft a plan.</span>
     </div>`;
     const plans = loadSavedPlans();
-    if (plans.length > 0) {
-      html += `<div class="save-panel" style="margin-top:14px;">
-        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--sage-deep);margin-bottom:8px;">SAVED · 保存済み (${plans.length}/${MAX_SAVES})</div>
-        <div class="save-panel-list">${buildSavedListHtml()}</div>
-      </div>`;
-    }
+    // 保存データの有無に関わらず Import 機能は提供 (他人からファイルを受け取った時の入口)
+    html += `<div class="save-panel" style="margin-top:14px;">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--sage-deep);margin-bottom:8px;">SAVED · 保存済み (${plans.length}/${MAX_SAVES})</div>
+      <div class="save-panel-tools">
+        <label for="importPlanFile" class="ghost btn-like" title="JSONファイルから取り込み">📥 インポート</label>
+        <input type="file" id="importPlanFile" accept="application/json,.json" style="display:none">
+        <button id="exportAllBtn" class="ghost" ${plans.length === 0 ? "disabled" : ""} title="保存済み全てをJSONで書き出し">📤 全てエクスポート</button>
+        <span class="save-panel-tools-note">※ JSON ファイルで他人と共有できます</span>
+      </div>
+      <div class="save-panel-list">${buildSavedListHtml()}</div>
+    </div>`;
     out.innerHTML = html;
     wireSavedListButtons();
     return;
@@ -2837,6 +2957,12 @@ function renderOutput() {
       <div class="save-panel-row">
         ${inputCell}
         <button id="savePlanBtn" class="ghost" ${canSave ? "" : "disabled"}>${btnLabel}</button>
+      </div>
+      <div class="save-panel-tools">
+        <label for="importPlanFile" class="ghost btn-like" title="JSONファイルから取り込み">📥 インポート</label>
+        <input type="file" id="importPlanFile" accept="application/json,.json" style="display:none">
+        <button id="exportAllBtn" class="ghost" ${plans.length === 0 ? "disabled" : ""} title="保存済み全てをJSONで書き出し">📤 全てエクスポート</button>
+        <span class="save-panel-tools-note">※ JSON ファイルで他人と共有できます</span>
       </div>
       <div class="save-panel-list">${buildSavedListHtml()}</div>
     </div>`;
