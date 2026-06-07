@@ -520,6 +520,30 @@
   .saved-actions { display: flex; gap: 6px; flex-shrink: 0; }
   .saved-actions button { padding: 4px 10px; font-size: 10px; }
   .saved-del-btn:hover { color: var(--rust); border-color: var(--rust); }
+  .saved-row.is-new {
+    background: rgba(122, 149, 104, 0.08);
+    border-left: 2px solid var(--sage-deep);
+    padding-left: 8px;
+  }
+  .saved-new-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    background: var(--sage-deep);
+    color: var(--bg);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    vertical-align: middle;
+  }
+  .saved-load-hint {
+    margin-top: 2px;
+    font-family: var(--jp-serif);
+    font-size: 11px;
+    color: var(--sage-deep);
+    font-style: italic;
+  }
   .save-cap-msg {
     flex: 1;
     padding: 8px 10px;
@@ -918,10 +942,11 @@ const ROOM_COLORS = {
   "駐車場":  "#d4d4cc",
   "ポーチ":  "#dccab4",
   "デッキ":  "#d8c5a8",
-  "テラス":  "#d8c5a8"
+  "テラス":  "#d8c5a8",
+  "アプローチ": "#c8c2b4"
 };
 
-const EXTERIOR_TYPES = ["中庭", "庭", "駐車場", "ポーチ", "デッキ", "テラス"];
+const EXTERIOR_TYPES = ["中庭", "庭", "駐車場", "ポーチ", "デッキ", "テラス", "アプローチ"];
 function isExterior(type) { return EXTERIOR_TYPES.includes(type); }
 
 // 駐車場に配置する車のサイズ (実寸の概略, m: 長さ × 幅)
@@ -958,6 +983,16 @@ const EXTERIOR_PATTERNS_SVG = `
       <line x1="0" y1="2" x2="8" y2="2" stroke="#a78a64" stroke-width="0.5"/>
       <line x1="0" y1="6" x2="8" y2="6" stroke="#a78a64" stroke-width="0.5"/>
     </pattern>
+    <pattern id="pat-approach" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+      <rect width="22" height="22" fill="#c8c2b4"/>
+      <rect x="1"  y="1"  width="7"  height="5" fill="#b6ae9c" stroke="#7a7368" stroke-width="0.35"/>
+      <rect x="9"  y="1"  width="12" height="6" fill="#cdc4b2" stroke="#7a7368" stroke-width="0.35"/>
+      <rect x="1"  y="7"  width="6"  height="6" fill="#c1b8a3" stroke="#7a7368" stroke-width="0.35"/>
+      <rect x="8"  y="8"  width="5"  height="5" fill="#aea693" stroke="#7a7368" stroke-width="0.35"/>
+      <rect x="14" y="8"  width="7"  height="5" fill="#bdb4a0" stroke="#7a7368" stroke-width="0.35"/>
+      <rect x="1"  y="14" width="11" height="7" fill="#cdc4b2" stroke="#7a7368" stroke-width="0.35"/>
+      <rect x="13" y="14" width="8"  height="7" fill="#b6ae9c" stroke="#7a7368" stroke-width="0.35"/>
+    </pattern>
   </defs>`;
 
 function exteriorFill(type) {
@@ -968,6 +1003,7 @@ function exteriorFill(type) {
     case "ポーチ": return "url(#pat-porch)";
     case "デッキ": return "url(#pat-deck)";
     case "テラス": return "url(#pat-deck)";
+    case "アプローチ": return "url(#pat-approach)";
     default: return ROOM_COLORS[type] || "#cde0c4";
   }
 }
@@ -1000,7 +1036,8 @@ const OPTION_LABELS = {
   "ホール": "ホール", "廊下": "廊下", "物入": "物入",
   "吹抜": "吹抜",
   "中庭": "中庭", "庭": "庭", "駐車場": "駐車場",
-  "ポーチ": "ポーチ", "デッキ": "デッキ", "テラス": "テラス"
+  "ポーチ": "ポーチ", "デッキ": "デッキ", "テラス": "テラス",
+  "アプローチ": "アプローチ"
 };
 
 // ============ Templates (外部ファイルから読み込み) ============
@@ -1041,7 +1078,7 @@ const state = {
   buildingPosition: { v: "north", h: "west" },
   addRoom: { open: false, type: "廊下", floor: 1, w: 1, h: 2 },
   zoom: 1.0, // 描画倍率(GRID_PX に掛かる)
-  saveLoad: { open: false, nameInput: "", loadedFromId: null },
+  saveLoad: { open: false, nameInput: "", loadedFromId: null, justImportedIds: [] },
   metricsHelpOpen: false
 };
 
@@ -1177,6 +1214,7 @@ function importPlansFromFile(file) {
     }
     const existing = loadSavedPlans();
     let added = 0, skipped = 0;
+    const newIds = [];
     for (const p of obj.plans) {
       if (existing.length + added >= MAX_SAVES) { skipped++; continue; }
       // 衝突回避のため ID は付け直し、createdAt は元データを保持(なければ現在時刻)
@@ -1191,11 +1229,15 @@ function importPlansFromFile(file) {
         buildingPosition: p.buildingPosition || { v: "north", h: "west" }
       };
       existing.push(entry);
+      newIds.push(newId);
       added++;
     }
     if (!persistSavedPlans(existing)) return;
-    let msg = `${added}件のプランを取り込みました。`;
-    if (skipped > 0) msg += `\n上限${MAX_SAVES}件のため${skipped}件はスキップしました(既存を削除してから再度取り込んでください)。`;
+    // 取り込んだエントリに NEW バッジを付ける。保存パネルが閉じていれば自動で開く。
+    state.saveLoad.justImportedIds = newIds;
+    state.saveLoad.open = true;
+    let msg = `${added}件のプランを取り込みました。\n\n下の保存一覧で「読込」ボタンを押すと、画面に表示できます。`;
+    if (skipped > 0) msg += `\n\n※ 上限${MAX_SAVES}件のため${skipped}件はスキップしました(既存を削除してから再度取り込んでください)。`;
     alert(msg);
     renderOutput();
   };
@@ -1292,14 +1334,15 @@ const DEFAULT_ROOM_SIZE = {
   "駐車場": [3, 6],   // 普通車 1台分(約2.7m × 5.5m)
   "ポーチ": [2, 2],
   "デッキ": [4, 2],
-  "テラス": [4, 2]
+  "テラス": [4, 2],
+  "アプローチ": [2, 4]  // 約1.82m × 3.64m (玄関までの石畳通路)
 };
 
 const ADDABLE_ROOM_TYPES = [
   "廊下", "ホール", "物入", "吹抜", "子供部屋", "寝室", "和室", "ヌック", "WS",
   "WIC", "SC", "土間", "トイレ", "洗面", "洗面LD", "LD", "風呂",
   "LDK", "リビング", "ダイニング", "キッチン", "玄関", "階段",
-  "中庭", "庭", "駐車場", "ポーチ", "デッキ", "テラス"
+  "中庭", "庭", "駐車場", "ポーチ", "アプローチ", "デッキ", "テラス"
 ];
 
 // ============ UI ============
@@ -2768,6 +2811,7 @@ function buildSavedListHtml() {
   if (plans.length === 0) {
     return `<div style="padding:10px 4px;color:var(--ink-soft);font-size:12px;">保存済みの間取り図はまだありません。</div>`;
   }
+  const importedIds = state.saveLoad.justImportedIds || [];
   return plans.map(p => {
     const dt = new Date(p.createdAt);
     const dts = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")} ${String(dt.getHours()).padStart(2,"0")}:${String(dt.getMinutes()).padStart(2,"0")}`;
@@ -2775,10 +2819,14 @@ function buildSavedListHtml() {
     const fc = p.input && p.input.floorCount;
     const meta = `${lw||"?"}m × ${lh||"?"}m / ${fc===1?"平屋":fc?fc+"階建":""}`;
     const safeName = (p.name || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    return `<div class="saved-row">
+    const isNew = importedIds.includes(p.id);
+    const newBadge = isNew ? ` <span class="saved-new-badge">NEW</span>` : "";
+    const loadHint = isNew ? `<div class="saved-load-hint">← 「読込」を押すと画面に表示されます</div>` : "";
+    return `<div class="saved-row${isNew ? " is-new" : ""}">
       <div class="saved-info">
-        <div class="saved-name">${safeName}</div>
+        <div class="saved-name">${safeName}${newBadge}</div>
         <div class="saved-meta">${meta} · ${dts}</div>
+        ${loadHint}
       </div>
       <div class="saved-actions">
         <button class="saved-load-btn ghost" data-save-id="${p.id}">読込</button>
@@ -2790,7 +2838,11 @@ function buildSavedListHtml() {
 }
 function wireSavedListButtons() {
   document.querySelectorAll(".saved-load-btn").forEach(b => {
-    b.onclick = () => applySavedPlan(b.dataset.saveId);
+    b.onclick = () => {
+      // 読込操作で NEW バッジは役目を終えるのでクリア
+      state.saveLoad.justImportedIds = [];
+      applySavedPlan(b.dataset.saveId);
+    };
   });
   document.querySelectorAll(".saved-exp-btn").forEach(b => {
     b.onclick = () => exportSinglePlan(b.dataset.saveId);
