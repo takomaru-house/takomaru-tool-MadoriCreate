@@ -16,36 +16,10 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* ── Sticky archive header ─────────────────────────────────────────── */
-  .archive-bar {
-    position: sticky; top: 0; z-index: 100;
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    background: rgba(245, 241, 232, 0.88);
-    padding: 14px 32px;
-    border-bottom: var(--hairline);
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    align-items: center;
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    color: var(--ink-soft);
-    text-transform: uppercase;
-  }
-  .archive-bar .mid {
-    text-align: center; font-family: var(--serif); font-style: italic;
-    font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--ink-soft);
-  }
-  .archive-bar .right { text-align: right; }
-  .archive-bar a { color: inherit; text-decoration: none; border-bottom: 0.5px solid transparent; transition: border-color var(--dur-quick) var(--ease); }
-  .archive-bar a:hover { border-color: var(--ink-soft); }
-
   /* ── App masthead ── slim band matching the original's footprint ─────────── */
   .masthead {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 18px 16px 14px;
+    margin: 0;
+    padding: 18px 32px 14px;
     border-bottom: var(--hairline);
     display: flex;
     align-items: center;
@@ -94,13 +68,12 @@
 
   /* ── Working area: input + output ──────────────────────────────────── */
   .layout {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 16px;
+    margin: 0;
+    padding: 0 32px;
     display: grid;
-    grid-template-columns: 400px 1fr;
-    gap: 16px;
-    min-height: calc(100vh - 220px);
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    min-height: calc(100vh - 170px);
   }
   @media (max-width: 980px) { .layout { grid-template-columns: 1fr; padding: 0 12px; } }
 
@@ -458,6 +431,157 @@
     background: var(--rust); color: var(--bg); transform: none; box-shadow: none;
   }
 
+  /* 駐車場の車種切替ボタン (選択中エリア内) */
+  .car-type-switch {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-left: 4px;
+    font-family: var(--jp-serif); font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .car-type-btn {
+    margin: 0; padding: 3px 8px;
+    background: transparent; color: var(--ink);
+    border: 0.5px solid var(--ink-soft); border-radius: 0;
+    font-family: var(--jp-serif); font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0; text-transform: none;
+    cursor: pointer;
+    transition: background var(--dur-quick) var(--ease), color var(--dur-quick) var(--ease);
+    box-shadow: none;
+  }
+  .car-type-btn:hover {
+    background: rgba(26, 24, 22, 0.06);
+    color: var(--ink);
+    border-color: var(--ink);
+    transform: none; box-shadow: none;
+  }
+  .car-type-btn.active {
+    background: var(--ink); color: var(--bg);
+    border-color: var(--ink);
+  }
+
+  /* ── Save / Load panel ─────────────────────────────────────────────── */
+  .save-panel {
+    margin: 0 0 14px;
+    padding: 14px 16px;
+    background: var(--bg);
+    border: 0.5px solid var(--ink);
+    font-family: var(--jp-serif); font-size: 13px;
+  }
+  .save-panel-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .save-panel-row input[type="text"]:focus { outline: none; border-color: var(--ink); background: #fff; }
+  .save-panel-row button { padding: 6px 12px; font-size: 10px; }
+  .save-panel-list { display: flex; flex-direction: column; gap: 0; }
+  .saved-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; padding: 8px 0;
+    border-top: var(--hairline-soft);
+  }
+  .saved-row:first-child { border-top: 0; }
+  .saved-info { min-width: 0; flex: 1; }
+  .saved-name {
+    font-family: var(--jp-serif); font-size: 13px; color: var(--ink); font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .saved-meta {
+    font-family: var(--mono); font-size: 10px; color: var(--ink-soft);
+    letter-spacing: 0.04em; margin-top: 2px;
+  }
+  .saved-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .saved-actions button { padding: 4px 10px; font-size: 10px; }
+  .saved-del-btn:hover { color: var(--rust); border-color: var(--rust); }
+  .save-cap-msg {
+    flex: 1;
+    padding: 8px 10px;
+    border: 0.5px solid var(--rust);
+    border-left: 2px solid var(--rust);
+    background: transparent;
+    font-family: var(--jp-serif); font-size: 12.5px;
+    line-height: 1.5; color: var(--rust);
+  }
+  .save-loaded-badge {
+    margin: 0 0 8px;
+    padding: 6px 10px;
+    border-left: 2px solid var(--sage-deep);
+    background: rgba(122, 149, 104, 0.10);
+    font-family: var(--jp-serif); font-size: 12px;
+    color: var(--ink);
+  }
+  .save-loaded-badge strong { font-weight: 500; }
+
+  /* ── Metrics help (指標の見方) ───────────────────────────────────────── */
+  .metrics-help {
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 0.5px solid var(--rule);
+    border-left: 2px solid var(--sage-deep);
+    font-family: var(--jp-serif); font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .metrics-help dl { margin: 0; }
+  .metrics-help dt {
+    font-weight: 500;
+    color: var(--sage-deep);
+    margin-top: 10px;
+    font-family: var(--jp-serif);
+    font-size: 13px;
+  }
+  .metrics-help dt:first-child { margin-top: 0; }
+  .metrics-help dd {
+    margin: 4px 0 0 0;
+    padding-left: 12px;
+    color: var(--ink-soft);
+    border-left: 0.5px solid var(--rule);
+  }
+  .metrics-help dd b { color: var(--ink); font-weight: 500; }
+  .metrics-help-note {
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 0.5px dashed var(--rule);
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  /* 面積サマリ (敷地・各階・延床) */
+  .area-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 4px 18px;
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 0.5px solid var(--rule);
+    border-left: 2px solid var(--wood-deep);
+    font-family: var(--jp-serif);
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .area-row { display: flex; align-items: baseline; gap: 8px; }
+  .area-row.total {
+    padding-top: 4px;
+    border-top: 0.5px dashed var(--rule);
+    grid-column: 1 / -1;
+    font-weight: 500;
+  }
+  .area-row.sub {
+    grid-column: 1 / -1;
+    padding-top: 2px;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+  }
+  .area-row.sub .area-lbl { color: var(--sage-deep); }
+  .area-lbl {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    min-width: 80px;
+  }
+
   /* ── View tabs (segmented hairline) ────────────────────────────────── */
   .view-tabs {
     display: flex; gap: 0;
@@ -552,13 +676,6 @@
 </style>
 </head>
 <body>
-<header class="archive-bar">
-  <div class="left">TAKOMARU&nbsp;·&nbsp;ARCHIVE</div>
-  <div class="mid">
-</div>
-  <div class="right">§ 02 · GENERATOR · LIVE</div>
-</header>
-
 <section class="masthead">
   <img class="tako" src="assets/takomaru.png" alt="タコまる">
   <div class="title">
@@ -673,7 +790,6 @@
     <div class="panel output-panel">
       <div class="panel-eye"><span class="num">B.</span> <span>OUTPUT · 結果</span></div>
       <h2 style="font-size: 4px">Drawings</h2>
-      <div class="jp-sub">候補と平面図</div>
       <div id="outputArea">
         <div class="empty">
           <span class="em-eye">§ 01 · STAND BY</span>
@@ -744,6 +860,9 @@ const FLOOR_LABEL = { 1: "1F", 2: "2F", 3: "3F" };
 // タコまる palette: warm paper tones with sage / wood tints
 const ROOM_COLORS = {
   "LDK":     "#e6ead9", // sage tint — main living
+  "リビング": "#e6ead9", // sage tint — living
+  "ダイニング": "#ede1ce", // warm paper — dining
+  "キッチン": "#ecdcc0", // wood tint — kitchen
   "玄関":    "#ecdcc0", // wood tint — entry / cover
   "階段":    "#e3ddd0", // paper-gray — circulation
   "風呂":    "#dde2d0", // sage soft — water
@@ -774,6 +893,13 @@ const ROOM_COLORS = {
 
 const EXTERIOR_TYPES = ["中庭", "庭", "駐車場", "ポーチ", "デッキ", "テラス"];
 function isExterior(type) { return EXTERIOR_TYPES.includes(type); }
+
+// 駐車場に配置する車のサイズ (実寸の概略, m: 長さ × 幅)
+const CAR_SIZES = {
+  "kei":     { lenM: 3.40, widM: 1.48, label: "軽自動車" },
+  "regular": { lenM: 4.70, widM: 1.75, label: "普通車" },
+  "large":   { lenM: 5.30, widM: 1.95, label: "大型車" }
+};
 
 // SVGパターン定義(外構ゾーン用)
 const EXTERIOR_PATTERNS_SVG = `
@@ -835,7 +961,8 @@ const OPTION_CATEGORIES = [
 const SELECTABLE_ORDER = OPTION_CATEGORIES.flatMap(c => c.options);
 
 const OPTION_LABELS = {
-  "LDK": "LDK", "玄関": "玄関", "階段": "階段",
+  "LDK": "LDK", "リビング": "リビング", "ダイニング": "ダイニング", "キッチン": "キッチン",
+  "玄関": "玄関", "階段": "階段",
   "風呂": "風呂", "洗面": "洗面", "洗面LD": "洗面+LD", "LD": "ランドリー",
   "トイレ": "トイレ", "SC": "シューズC", "土間": "土間収納", "WIC": "WIC",
   "寝室": "主寝室", "子供部屋": "子供部屋",
@@ -883,8 +1010,132 @@ const state = {
   viewMode: "1F", // "1F" | "2F" | "overlay"
   buildingPosition: { v: "north", h: "west" },
   addRoom: { open: false, type: "廊下", floor: 1, w: 1, h: 2 },
-  zoom: 1.0 // 描画倍率(GRID_PX に掛かる)
+  zoom: 1.0, // 描画倍率(GRID_PX に掛かる)
+  saveLoad: { open: false, nameInput: "", loadedFromId: null },
+  metricsHelpOpen: false
 };
+
+// ============ 保存・読込 (localStorage) ============
+const SAVES_KEY = "takomaru_saved_plans_v1";
+const MAX_SAVES = 5;
+
+function loadSavedPlans() {
+  try {
+    const raw = localStorage.getItem(SAVES_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+function persistSavedPlans(plans) {
+  try {
+    localStorage.setItem(SAVES_KEY, JSON.stringify(plans));
+    return true;
+  } catch (e) {
+    alert("保存に失敗しました(ブラウザの容量制限の可能性): " + e.message);
+    return false;
+  }
+}
+// 現在の workingTemplate / workingRooms / lastInput から保存エントリを構築
+function buildSavePayload(name) {
+  const trimmed = (name || "").trim();
+  return {
+    name: trimmed || ("無題 " + new Date().toLocaleString("ja-JP")),
+    input: { ...state.lastInput },
+    template: {
+      id: state.workingTemplate.id,
+      name: state.workingTemplate.name,
+      approach: state.workingTemplate.approach,
+      floors: state.workingTemplate.floors,
+      landGridW: state.workingTemplate.landGridW,
+      landGridH: state.workingTemplate.landGridH,
+      landRangeM: state.workingTemplate.landRangeM || null,
+      variableRooms: state.workingTemplate.variableRooms || [],
+      isBlank: !!state.workingTemplate.isBlank
+    },
+    rooms: state.workingRooms.map(r => ({ ...r })),
+    buildingPosition: { ...(state.buildingPosition || { v: "north", h: "west" }) }
+  };
+}
+function saveCurrentPlan(name) {
+  if (!state.workingTemplate || !state.workingRooms || !state.lastInput) {
+    alert("保存する間取り図がありません。先に生成してください。");
+    return null;
+  }
+  const plans = loadSavedPlans();
+  if (plans.length >= MAX_SAVES) {
+    alert(`保存は最大 ${MAX_SAVES} 件までです。不要なものを削除してください。`);
+    return null;
+  }
+  const payload = buildSavePayload(name);
+  const entry = {
+    id: "save_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+    createdAt: new Date().toISOString(),
+    ...payload
+  };
+  plans.push(entry);
+  return persistSavedPlans(plans) ? entry.id : null;
+}
+function overwriteSavedPlan(id, name) {
+  if (!state.workingTemplate || !state.workingRooms || !state.lastInput) {
+    alert("上書きする間取り図がありません。先に生成または読込してください。");
+    return false;
+  }
+  const plans = loadSavedPlans();
+  const idx = plans.findIndex(p => p.id === id);
+  if (idx === -1) {
+    alert("上書き対象が見つかりません(既に削除された可能性があります)。新規保存に切り替えてください。");
+    return false;
+  }
+  const payload = buildSavePayload(name || plans[idx].name);
+  plans[idx] = {
+    id: plans[idx].id,
+    createdAt: new Date().toISOString(), // 更新日時として扱う
+    ...payload
+  };
+  return persistSavedPlans(plans);
+}
+function deleteSavedPlan(id) {
+  const next = loadSavedPlans().filter(p => p.id !== id);
+  persistSavedPlans(next);
+  if (state.saveLoad.loadedFromId === id) state.saveLoad.loadedFromId = null;
+}
+function applySavedPlan(id) {
+  const p = loadSavedPlans().find(x => x.id === id);
+  if (!p) { alert("保存データが見つかりません"); return false; }
+  // 入力フォームの主要項目を保存値で上書き
+  syncInputFormFromSaved(p.input);
+  // state を復元
+  state.lastInput = { ...p.input };
+  state.workingTemplate = { ...p.template, rooms: p.rooms.map(r => ({ ...r })) };
+  state.workingRooms = p.rooms.map(r => ({ ...r }));
+  state.buildingPosition = { ...(p.buildingPosition || { v: "north", h: "west" }) };
+  state.viewMode = "1F";
+  state.selectedRoomIdx = null;
+  state.warnings = [];
+  state.candidates = [{
+    template: state.workingTemplate,
+    score: 0,
+    breakdown: [`保存済み「${p.name}」を呼び出し`]
+  }];
+  state.currentIdx = 0;
+  state.saveLoad.open = false;
+  state.saveLoad.loadedFromId = p.id;
+  state.saveLoad.nameInput = p.name; // 上書き時に名前を引き継ぐ初期値
+  zoomFitWidth(); // renderOutput を内部で呼ぶ
+  return true;
+}
+// 保存データから入力フォームの主要項目だけ同期(オプション類は触らない)
+function syncInputFormFromSaved(input) {
+  if (!input) return;
+  const set = (id, val) => { const el = document.getElementById(id); if (el != null && val != null) el.value = val; };
+  set("landW", input.landWidthM);
+  set("landH", input.landHeightM);
+  set("approach", input.approach);
+  set("floorCount", input.floorCount);
+  if (input.maxCoverage != null) set("maxCoverage", input.maxCoverage);
+  if (input.maxFAR != null) set("maxFAR", input.maxFAR);
+}
 
 // ============ ズーム制御 ============
 function setZoom(z) {
@@ -902,15 +1153,18 @@ function zoomFitWidth() {
   const wrap = document.querySelector(".panel.output-panel");
   if (!wrap) return;
   const availW = Math.max(400, wrap.clientWidth - 60); // 60px padding/border 分を控除
-  // 概算: totalW ≈ gridW * scale + 200 と仮定して逆算
-  const target = (availW - 200) / t.landGridW;
-  const targetZoom = target / GRID_PX;
+  // padding = 50 + scale なので totalW ≈ (gridW + 2) * scale + 100
+  const targetScale = (availW - 100) / (t.landGridW + 2);
+  const targetZoom = targetScale / GRID_PX;
   setZoom(Math.min(1.0, targetZoom));
 }
 
 // 部屋追加時のデフォルトサイズ(グリッド)
 const DEFAULT_ROOM_SIZE = {
   "LDK": [8, 4],     // 16畳
+  "リビング": [4, 4], // 8畳
+  "ダイニング": [3, 4], // 6畳
+  "キッチン": [2, 3], // 3畳
   "玄関": [2, 2],     // 2畳
   "階段": [2, 2],     // 2畳
   "風呂": [2, 2],     // 2畳
@@ -942,7 +1196,7 @@ const DEFAULT_ROOM_SIZE = {
 const ADDABLE_ROOM_TYPES = [
   "廊下", "ホール", "物入", "吹抜", "子供部屋", "寝室", "和室", "ヌック", "WS",
   "WIC", "SC", "土間", "トイレ", "洗面", "洗面LD", "LD", "風呂",
-  "LDK", "玄関", "階段",
+  "LDK", "リビング", "ダイニング", "キッチン", "玄関", "階段",
   "中庭", "庭", "駐車場", "ポーチ", "デッキ", "テラス"
 ];
 
@@ -1117,6 +1371,19 @@ function buildingFootprintGrid(rooms) {
   return rooms
     .filter(r => r.floor === 1 && !isExterior(r.type) && r.type !== "吹抜")
     .reduce((sum, r) => sum + r.w * r.h, 0);
+}
+// 指定階の床面積 (グリッド単位、外構と吹抜は除外)
+function floorAreaGridFor(rooms, floor) {
+  return rooms
+    .filter(r => r.floor === floor && !isExterior(r.type) && r.type !== "吹抜")
+    .reduce((sum, r) => sum + r.w * r.h, 0);
+}
+
+// ㎡ ↔ 坪 換算 (1坪 = 400/121 ㎡ ≈ 3.3058㎡)
+const M2_PER_TSUBO = 400 / 121;
+function m2ToTsubo(m2) { return m2 / M2_PER_TSUBO; }
+function formatAreaPair(m2) {
+  return `<strong>${m2.toFixed(2)} ㎡</strong> <span style="color:var(--ink-soft);font-family:var(--mono);font-size:11px;">(${m2ToTsubo(m2).toFixed(2)} 坪)</span>`;
 }
 
 // 建物内で w×h の空きを探す。見つからなければ null
@@ -1380,6 +1647,8 @@ function calcChokkaritsu(rooms, gridW, gridH, floors=null) {
 
 const HALLWAY_TYPES = ["廊下", "ホール"];
 const STORAGE_TYPES = ["SC", "土間", "WIC", "物入"];
+// LDK 比率には、結合済み「LDK」 + 個別に置いた リビング/ダイニング/キッチン も合算
+const LDK_TYPES = ["LDK", "リビング", "ダイニング", "キッチン"];
 
 function computeAreaMetrics(rooms) {
   let total = 0, ldk = 0, hallway = 0, storage = 0, stairs = 0;
@@ -1388,7 +1657,7 @@ function computeAreaMetrics(rooms) {
     if (isExterior(r.type)) continue; // 外構は延床面積に含めない
     const a = r.w * r.h;
     total += a;
-    if (r.type === "LDK") ldk += a;
+    if (LDK_TYPES.includes(r.type)) ldk += a;
     else if (HALLWAY_TYPES.includes(r.type)) hallway += a;
     else if (STORAGE_TYPES.includes(r.type)) storage += a;
     else if (r.type === "階段") stairs += a;
@@ -1426,8 +1695,9 @@ function metricColorClass(name, v) {
       if (v >= 0.20 && v <= 0.40) return "";
       return "warn";
     case "storage":
-      if (v >= 0.10 && v <= 0.15) return "good";
-      if (v >= 0.08 && v <= 0.18) return "";
+      // 収納は多い分には問題なし(片付けやすさ重視) — 下限のみ厳しく判定
+      if (v >= 0.10) return "good";
+      if (v >= 0.08) return "";
       return "warn";
     case "hallway":
       if (v < 0.12) return "good";
@@ -1457,41 +1727,44 @@ function computeFloorDims(gridW, gridH, scale) {
   const landExtraY = (landH_px - buildingH) / 2;
   const setback = SETBACK_MM * pxPerMm;
 
-  // どの配置でも収まるパディングを計算
+  // どの配置でも収まるパディングを計算(X/Y それぞれ独立)
   const maxExtentX = Math.max(landExtraX, setback, landW_px - setback - buildingW);
   const maxExtentY = Math.max(landExtraY, setback, landH_px - setback - buildingH);
-  const padding = Math.max(30 + 4 * scale, maxExtentX + 60, maxExtentY + 60);
-  const totalW = buildingW + padding * 2;
-  const totalH = buildingH + padding * 2 + 20;
+  const paddingMin = 50 + scale;
+  const paddingX = Math.max(paddingMin, maxExtentX + 48);
+  const paddingY = Math.max(paddingMin, maxExtentY + 48);
+  const padding = paddingX; // 互換用(参照箇所はあるが新コードでは paddingX/Y を使う)
+  const totalW = buildingW + paddingX * 2;
+  const totalH = buildingH + paddingY * 2 + 20;
 
   const pos = state.buildingPosition || { v: "center", h: "center" };
   let landX, landY;
   if (pos.h === "west") {
-    landX = padding - setback;
+    landX = paddingX - setback;
   } else if (pos.h === "east") {
-    landX = padding + buildingW + setback - landW_px;
+    landX = paddingX + buildingW + setback - landW_px;
   } else {
-    landX = padding - landExtraX;
+    landX = paddingX - landExtraX;
   }
   if (pos.v === "north") {
-    landY = padding - setback;
+    landY = paddingY - setback;
   } else if (pos.v === "south") {
-    landY = padding + buildingH + setback - landH_px;
+    landY = paddingY + buildingH + setback - landH_px;
   } else {
-    landY = padding - landExtraY;
+    landY = paddingY - landExtraY;
   }
 
   // 土地が建物より小さい場合のセーフガード(中央寄せにフォールバック)
-  if (landW_px < buildingW + setback) landX = padding - landExtraX;
-  if (landH_px < buildingH + setback) landY = padding - landExtraY;
+  if (landW_px < buildingW + setback) landX = paddingX - landExtraX;
+  if (landH_px < buildingH + setback) landY = paddingY - landExtraY;
 
-  return { buildingW, buildingH, padding, totalW, totalH, landX, landY, landW_px, landH_px, landW_m, landH_m, landExtraX, landExtraY, setback, pos };
+  return { buildingW, buildingH, padding, paddingX, paddingY, totalW, totalH, landX, landY, landW_px, landH_px, landW_m, landH_m, landExtraX, landExtraY, setback, pos };
 }
 
 function renderFloor(rooms, floor, gridW, gridH, scale=GRID_PX, interactive=false, overlayMode=false, ghostFloor=null, totalFloors=null) {
   const d = computeFloorDims(gridW, gridH, scale);
   const w = d.buildingW, h = d.buildingH;
-  const padding = d.padding;
+  const paddingX = d.paddingX, paddingY = d.paddingY;
   const totalW = d.totalW, totalH = d.totalH;
   const fmax = totalFloors || roomsMaxFloor(rooms);
 
@@ -1509,15 +1782,15 @@ function renderFloor(rooms, floor, gridW, gridH, scale=GRID_PX, interactive=fals
   // 土地外周(paper)
   svg += `<rect x="${d.landX}" y="${d.landY}" width="${d.landW_px}" height="${d.landH_px}" fill="#f0eadb" stroke="#8a6740" stroke-width="1.5"/>`;
   // 建物外周(hairline dashed)
-  svg += `<rect x="${padding}" y="${padding}" width="${w}" height="${h}" fill="#faf8f3" stroke="#1a1816" stroke-width="1" stroke-dasharray="5,3"/>`;
+  svg += `<rect x="${paddingX}" y="${paddingY}" width="${w}" height="${h}" fill="#faf8f3" stroke="#1a1816" stroke-width="1" stroke-dasharray="5,3"/>`;
 
   // ゴースト表示(別の階の間取りを薄く重ねて表示)
   const isGhostMode = (ghostFloor !== null && ghostFloor !== floor);
   if (isGhostMode) {
     const ghostRooms = rooms.filter(r => r.floor === ghostFloor);
     for (const r of ghostRooms) {
-      const gx = r.x * scale + padding;
-      const gy = (gridH - r.y - r.h) * scale + padding;
+      const gx = r.x * scale + paddingX;
+      const gy = (gridH - r.y - r.h) * scale + paddingY;
       const grw = r.w * scale, grh = r.h * scale;
       const fill = ROOM_COLORS[r.type] || "#fff";
       svg += `<rect x="${gx}" y="${gy}" width="${grw}" height="${grh}" fill="${fill}" stroke="#8a6740" stroke-width="0.6" opacity="0.5" pointer-events="none"/>`;
@@ -1543,13 +1816,14 @@ function renderFloor(rooms, floor, gridW, gridH, scale=GRID_PX, interactive=fals
 
   for (const r of fr) {
     const idx = rooms.indexOf(r);
-    const x = r.x * scale + padding;
-    const y = (gridH - r.y - r.h) * scale + padding;
+    const x = r.x * scale + paddingX;
+    const y = (gridH - r.y - r.h) * scale + paddingY;
     const rw = r.w * scale, rh = r.h * scale;
     const isExt = isExterior(r.type);
     const fill = isExt ? exteriorFill(r.type) : (ROOM_COLORS[r.type] || "#fff");
     const isSelected = state.selectedRoomIdx === idx;
-    const isOOB = (r.x < 0 || r.x + r.w > gridW || r.y < 0 || r.y + r.h > gridH);
+    // 外構(駐車場/庭/ポーチ/デッキ/テラス/中庭)は建物外に置くのが自然なため OOB 判定対象外
+    const isOOB = !isExt && (r.x < 0 || r.x + r.w > gridW || r.y < 0 || r.y + r.h > gridH);
     const isOverlap = overlapIds.has(idx);
 
     let stroke = isExt ? "#7a8a64" : "#4a4640";
@@ -1583,6 +1857,10 @@ function renderFloor(rooms, floor, gridW, gridH, scale=GRID_PX, interactive=fals
     const labelColor = isExt ? "#4a5640" : "#1a1816";
     if (rw < 50 || rh < 30) {
       svg += `<text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="10" fill="${labelColor}">${label}</text>`;
+    } else if (r.type === "駐車場") {
+      // 駐車場: 車を中央、ラベル(駐車場 + 面積)は上端に小さく
+      const areaM2 = (r.w * r.h * 0.91 * 0.91).toFixed(1);
+      svg += `<text x="${cx}" y="${y + 12}" text-anchor="middle" font-size="10" fill="${labelColor}" font-weight="500" font-style="italic">${label} <tspan font-family="JetBrains Mono, monospace" font-size="9" fill="#5a6450">· ${areaM2} m²</tspan></text>`;
     } else if (isExt) {
       // 外構は畳数を出さず、面積(㎡)を出す
       const areaM2 = (r.w * r.h * 0.91 * 0.91).toFixed(1);
@@ -1595,13 +1873,17 @@ function renderFloor(rooms, floor, gridW, gridH, scale=GRID_PX, interactive=fals
 
     // LDK の場合キッチンを内部に重ねて描画
     if (r.type === "LDK" && r.kitchen) {
-      svg += renderKitchenInside(r, padding, gridH, scale, interactive);
+      svg += renderKitchenInside(r, paddingX, paddingY, gridH, scale, interactive);
+    }
+    // 駐車場の場合、車のシルエットを描画
+    if (r.type === "駐車場") {
+      svg += renderCarInParking(r, paddingX, paddingY, gridH, scale);
     }
   }
 
   // 外壁の強調描画(室内↔外構/外 の境界を太線で)
   // getWalls の結果のうち、両側のセルカテゴリを見て外壁のみ太線で描く
-  svg += renderExteriorWalls(rooms, floor, gridW, gridH, scale, padding);
+  svg += renderExteriorWalls(rooms, floor, gridW, gridH, scale, paddingX, paddingY);
 
   // 寸法線(土地寸法+選択部屋寸法)
   const selectedRoom = (state.selectedRoomIdx !== null && state.workingRooms) ? state.workingRooms[state.selectedRoomIdx] : null;
@@ -1609,7 +1891,7 @@ function renderFloor(rooms, floor, gridW, gridH, scale=GRID_PX, interactive=fals
 
   // 1F+2F 重ね表示(overlayMode 時、2F の壁を 1F に重ね描画)
   if (overlayMode) {
-    svg += renderOverlayWalls(rooms, gridW, gridH, scale, padding);
+    svg += renderOverlayWalls(rooms, gridW, gridH, scale, paddingX, paddingY);
   }
 
   if (interactive) {
@@ -1618,24 +1900,24 @@ function renderFloor(rooms, floor, gridW, gridH, scale=GRID_PX, interactive=fals
     for (let i = 0; i < edges.length; i++) {
       const e = edges[i];
       if (e.type === "V") {
-        const ex = e.x * scale + padding - HT/2;
-        const ey = (gridH - e.y - e.length) * scale + padding;
+        const ex = e.x * scale + paddingX - HT/2;
+        const ey = (gridH - e.y - e.length) * scale + paddingY;
         svg += `<rect class="edge-handle-v" data-edge-idx="${i}" data-floor="${floor}" x="${ex}" y="${ey}" width="${HT}" height="${e.length * scale}"/>`;
       } else {
-        const ex = e.x * scale + padding;
-        const ey = (gridH - e.y) * scale + padding - HT/2;
+        const ex = e.x * scale + paddingX;
+        const ey = (gridH - e.y) * scale + paddingY - HT/2;
         svg += `<rect class="edge-handle-h" data-edge-idx="${i}" data-floor="${floor}" x="${ex}" y="${ey}" width="${e.length * scale}" height="${HT}"/>`;
       }
     }
     // edge handles の後にキッチン回転ボタンを描画(常に最前面)
     for (const r of fr) {
       if (r.type === "LDK" && r.kitchen) {
-        svg += renderKitchenRotateButton(r, padding, gridH, scale);
+        svg += renderKitchenRotateButton(r, paddingX, paddingY, gridH, scale);
       }
     }
   }
 
-  const ccx = padding + w - 18, ccy = padding + h - 18;
+  const ccx = paddingX + w - 18, ccy = paddingY + h - 18;
   svg += `<circle cx="${ccx}" cy="${ccy}" r="14" fill="#faf8f3" stroke="#1a1816" stroke-width="0.7"/>`;
   svg += `<text x="${ccx}" y="${ccy-2}" text-anchor="middle" font-size="9" fill="#4a4640" font-family="JetBrains Mono, monospace" letter-spacing="1">N</text>`;
   svg += `<line x1="${ccx}" y1="${ccy+1}" x2="${ccx}" y2="${ccy+10}" stroke="#b35a3a" stroke-width="1.4"/>`;
@@ -1646,11 +1928,25 @@ function renderFloor(rooms, floor, gridW, gridH, scale=GRID_PX, interactive=fals
 
 // 外壁の太線描画(室内↔外/外構 の境界を黒の太線で強調)
 // 内壁(室内↔室内) は各部屋の rect 境界で既に描かれているのでスキップ
-function renderExteriorWalls(rooms, floor, gridW, gridH, scale, padding) {
-  const gw = Math.max(1, Math.ceil(gridW));
-  const gh = Math.max(1, Math.ceil(gridH));
-  const map = buildCellMap(rooms, floor, gw, gh);
+function renderExteriorWalls(rooms, floor, gridW, gridH, scale, paddingX, paddingY) {
+  // 部屋は 1/4 グリッド(22.75cm)単位で動かせるため、壁判定も同じ解像度で行う。
+  // (整数グリッドだと、半マス位置にある部屋の縁が「次の整数セル」に丸められて
+  //  壁がズレて見える問題を回避)
+  const SUB = 4; // 1 マス = 4 サブセル
+  const gw = Math.max(1, Math.ceil(gridW * SUB));
+  const gh = Math.max(1, Math.ceil(gridH * SUB));
+  const map = new Array(gw * gh).fill(null);
+  for (const r of rooms.filter(rr => rr.floor === floor)) {
+    const xStart = Math.max(0, Math.round(r.x * SUB));
+    const yStart = Math.max(0, Math.round(r.y * SUB));
+    const xEnd = Math.min(gw, Math.round((r.x + r.w) * SUB));
+    const yEnd = Math.min(gh, Math.round((r.y + r.h) * SUB));
+    for (let y = yStart; y < yEnd; y++)
+      for (let x = xStart; x < xEnd; x++)
+        map[y * gw + x] = r;
+  }
   let svg = '';
+  const u = scale / SUB; // サブセル 1 マスあたりの SVG 距離
   // 縦壁
   for (let x = 0; x <= gw; x++) for (let y = 0; y < gh; y++) {
     const left = (x > 0) ? map[y * gw + (x-1)] : null;
@@ -1658,9 +1954,9 @@ function renderExteriorWalls(rooms, floor, gridW, gridH, scale, padding) {
     if (!shouldDrawWall(left, right)) continue;
     const ca = cellCategory(left), cb = cellCategory(right);
     if (ca === 'indoor' && cb === 'indoor') continue; // 内壁はスキップ
-    const px = x * scale + padding;
-    const py1 = (gh - y - 1) * scale + padding;
-    const py2 = (gh - y) * scale + padding;
+    const px = x * u + paddingX;
+    const py1 = (gh - y - 1) * u + paddingY;
+    const py2 = (gh - y) * u + paddingY;
     svg += `<line x1="${px}" y1="${py1}" x2="${px}" y2="${py2}" stroke="#1a1816" stroke-width="2.4" stroke-linecap="square" pointer-events="none"/>`;
   }
   // 横壁
@@ -1670,22 +1966,53 @@ function renderExteriorWalls(rooms, floor, gridW, gridH, scale, padding) {
     if (!shouldDrawWall(below, above)) continue;
     const ca = cellCategory(below), cb = cellCategory(above);
     if (ca === 'indoor' && cb === 'indoor') continue;
-    const py = (gh - y) * scale + padding;
-    const px1 = x * scale + padding;
-    const px2 = (x + 1) * scale + padding;
+    const py = (gh - y) * u + paddingY;
+    const px1 = x * u + paddingX;
+    const px2 = (x + 1) * u + paddingX;
     svg += `<line x1="${px1}" y1="${py}" x2="${px2}" y2="${py}" stroke="#1a1816" stroke-width="2.4" stroke-linecap="square" pointer-events="none"/>`;
   }
   return svg;
 }
 
 // 重ね表示用の壁オーバーレイ(2F以上の壁を1Fに重ねて色分け表示)
-function renderOverlayWalls(rooms, gridW, gridH, scale, padding) {
-  const walls1F = getWalls(rooms, 1, gridW, gridH);
+function renderOverlayWalls(rooms, gridW, gridH, scale, paddingX, paddingY) {
+  // renderExteriorWalls と同じく 1/4 グリッド(22.75cm)解像度で判定し、
+  // 部屋の縁が半マス位置にある場合でも壁が正しい位置に出るようにする。
+  const SUB = 4;
+  const gw = Math.max(1, Math.ceil(gridW * SUB));
+  const gh = Math.max(1, Math.ceil(gridH * SUB));
+  const u = scale / SUB;
+  // サブグリッド解像度で壁集合を構築 (V_x_y / H_x_y, 座標はサブセル単位)
+  function buildWallsSub(floor) {
+    const map = new Array(gw * gh).fill(null);
+    for (const r of rooms.filter(rr => rr.floor === floor)) {
+      const xs = Math.max(0, Math.round(r.x * SUB));
+      const ys = Math.max(0, Math.round(r.y * SUB));
+      const xe = Math.min(gw, Math.round((r.x + r.w) * SUB));
+      const ye = Math.min(gh, Math.round((r.y + r.h) * SUB));
+      for (let y = ys; y < ye; y++)
+        for (let x = xs; x < xe; x++)
+          map[y * gw + x] = r;
+    }
+    const walls = new Set();
+    for (let x = 0; x <= gw; x++) for (let y = 0; y < gh; y++) {
+      const left = (x > 0) ? map[y * gw + (x-1)] : null;
+      const right = (x < gw) ? map[y * gw + x] : null;
+      if (shouldDrawWall(left, right)) walls.add(`V_${x}_${y}`);
+    }
+    for (let y = 0; y <= gh; y++) for (let x = 0; x < gw; x++) {
+      const below = (y > 0) ? map[(y-1) * gw + x] : null;
+      const above = (y < gh) ? map[y * gw + x] : null;
+      if (shouldDrawWall(below, above)) walls.add(`H_${x}_${y}`);
+    }
+    return walls;
+  }
+  const walls1F = buildWallsSub(1);
   const fmax = roomsMaxFloor(rooms);
   let svg = '';
   // 各上階を 1F に重ねる
   for (let f = 2; f <= fmax; f++) {
-    const wallsUpper = getWalls(rooms, f, gridW, gridH);
+    const wallsUpper = buildWallsSub(f);
     for (const w of wallsUpper) {
       const parts = w.split("_");
       const type = parts[0];
@@ -1698,20 +2025,20 @@ function renderOverlayWalls(rooms, gridW, gridH, scale, padding) {
       // 3F は色相を変える(青系)で識別
       const stroke = (f >= 3 && !isMatch) ? "#3a5a8a" : color;
       if (type === "V") {
-        const sx = x * scale + padding;
-        const sy1 = (gridH - y - 1) * scale + padding;
-        const sy2 = (gridH - y) * scale + padding;
+        const sx = x * u + paddingX;
+        const sy1 = (gh - y - 1) * u + paddingY;
+        const sy2 = (gh - y) * u + paddingY;
         svg += `<line x1="${sx}" y1="${sy1}" x2="${sx}" y2="${sy2}" stroke="${stroke}" stroke-width="${sw}"${dash} pointer-events="none" opacity="0.85"/>`;
       } else {
-        const sx1 = x * scale + padding;
-        const sx2 = (x + 1) * scale + padding;
-        const sy = (gridH - y) * scale + padding;
+        const sx1 = x * u + paddingX;
+        const sx2 = (x + 1) * u + paddingX;
+        const sy = (gh - y) * u + paddingY;
         svg += `<line x1="${sx1}" y1="${sy}" x2="${sx2}" y2="${sy}" stroke="${stroke}" stroke-width="${sw}"${dash} pointer-events="none" opacity="0.85"/>`;
       }
     }
   }
   // 凡例
-  svg += `<g transform="translate(${padding}, ${padding - 26})" pointer-events="none">`;
+  svg += `<g transform="translate(${paddingX}, ${paddingY - 26})" pointer-events="none">`;
   svg += `<rect x="0" y="0" width="230" height="22" fill="#faf8f3" stroke="#1a1816" stroke-width="0.5" opacity="0.95"/>`;
   svg += `<line x1="6" y1="11" x2="22" y2="11" stroke="#3d4a32" stroke-width="2.2"/>`;
   svg += `<text x="26" y="14" font-size="10" fill="#1a1816" font-family="Noto Serif JP, serif">上階壁が下階に一致</text>`;
@@ -1721,8 +2048,75 @@ function renderOverlayWalls(rooms, gridW, gridH, scale, padding) {
   return svg;
 }
 
+// 駐車場が指定車種を収容できるか判定
+function carFitsInParking(park) {
+  const car = CAR_SIZES[park.carType || "regular"] || CAR_SIZES.regular;
+  const parkLongM = Math.max(park.w, park.h) * 0.91;
+  const parkShortM = Math.min(park.w, park.h) * 0.91;
+  // 実用判定: 長辺は車の長さ、短辺は車の幅以上ないと駐車不可
+  return parkLongM >= car.lenM && parkShortM >= car.widM;
+}
+
+// 駐車場に車の図を描画
+function renderCarInParking(park, paddingX, paddingY, gridH, scale) {
+  const carType = park.carType || "regular";
+  const car = CAR_SIZES[carType] || CAR_SIZES.regular;
+  // 駐車場の SVG 矩形位置
+  const px = park.x * scale + paddingX;
+  const py = (gridH - park.y - park.h) * scale + paddingY;
+  const pw = park.w * scale;
+  const ph = park.h * scale;
+  // 駐車場の長い辺に合わせて車の向きを決める
+  const isVertical = park.h >= park.w;
+  // 実寸 → SVG ピクセル(クランプしない: はみ出しはそのまま見せて NG を視覚化)
+  const carLenPx = (car.lenM / 0.91) * scale;
+  const carWidPx = (car.widM / 0.91) * scale;
+  const carWPx = isVertical ? carWidPx : carLenPx;
+  const carHPx = isVertical ? carLenPx : carWidPx;
+  if (carWPx <= 4 || carHPx <= 4) return '';
+  const cx = px + pw / 2;
+  const cy = py + ph / 2;
+  const carX = cx - carWPx / 2;
+  const carY = cy - carHPx / 2;
+  const fits = carFitsInParking(park);
+  // 色: 収まる=濃グレー、収まらない=赤系で警告
+  const bodyFill   = fits ? "#3a3a36" : "#b35a3a";
+  const bodyStroke = fits ? "#1a1816" : "#7a2d18";
+  const winFill    = fits ? "#a8c4d6" : "#f3d8cc";
+  let svg = '<g pointer-events="none">';
+  // 車体(角丸矩形)
+  const radius = Math.min(carWPx, carHPx) * 0.18;
+  svg += `<rect x="${carX}" y="${carY}" width="${carWPx}" height="${carHPx}" rx="${radius}" ry="${radius}" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="${fits?0.6:1.4}" opacity="0.9"/>`;
+  if (isVertical) {
+    const wsH = carHPx * 0.18;
+    const wsW = carWPx * 0.78;
+    const wsX = carX + carWPx * 0.11;
+    svg += `<rect x="${wsX}" y="${carY + carHPx * 0.10}" width="${wsW}" height="${wsH}" rx="1.5" fill="${winFill}" opacity="0.6"/>`;
+    svg += `<rect x="${wsX}" y="${carY + carHPx * 0.72}" width="${wsW}" height="${wsH}" rx="1.5" fill="${winFill}" opacity="0.45"/>`;
+    svg += `<polygon points="${cx-3},${carY + carHPx * 0.05} ${cx+3},${carY + carHPx * 0.05} ${cx},${carY + carHPx * 0.01}" fill="#faf8f3" opacity="0.7"/>`;
+  } else {
+    const wsW = carWPx * 0.18;
+    const wsH = carHPx * 0.78;
+    const wsY = carY + carHPx * 0.11;
+    svg += `<rect x="${carX + carWPx * 0.10}" y="${wsY}" width="${wsW}" height="${wsH}" rx="1.5" fill="${winFill}" opacity="0.6"/>`;
+    svg += `<rect x="${carX + carWPx * 0.72}" y="${wsY}" width="${wsW}" height="${wsH}" rx="1.5" fill="${winFill}" opacity="0.45"/>`;
+    svg += `<polygon points="${carX + carWPx * 0.05},${cy-3} ${carX + carWPx * 0.05},${cy+3} ${carX + carWPx * 0.01},${cy}" fill="#faf8f3" opacity="0.7"/>`;
+  }
+  // 車種ラベル
+  const labelFontSize = Math.min(11, Math.min(carWPx, carHPx) * 0.28);
+  if (labelFontSize >= 7) {
+    svg += `<text x="${cx}" y="${cy + labelFontSize * 0.35}" text-anchor="middle" font-size="${labelFontSize}" fill="#faf8f3" font-weight="500" font-family="JetBrains Mono, monospace" letter-spacing="0.5" opacity="0.9">${car.label}</text>`;
+  }
+  // 収まらない場合: NG ラベル
+  if (!fits) {
+    svg += `<text x="${cx}" y="${cy + carHPx / 2 + 14}" text-anchor="middle" font-size="11" fill="#b35a3a" font-weight="700" font-family="JetBrains Mono, monospace" letter-spacing="0.5">⚠ ${car.label} (${car.lenM}m × ${car.widM}m) には駐車場が不足</text>`;
+  }
+  svg += '</g>';
+  return svg;
+}
+
 // LDK内のキッチン描画(自由位置・回転対応)
-function renderKitchenInside(ldk, padding, gridH, scale, interactive) {
+function renderKitchenInside(ldk, paddingX, paddingY, gridH, scale, interactive) {
   const k = ldk.kitchen;
   if (!k) return '';
   const rotation = k.rotation || 0;
@@ -1750,10 +2144,10 @@ function renderKitchenInside(ldk, padding, gridH, scale, interactive) {
   const sw = (k.width / 910) * scale;
   const sh = (k.depth / 910) * scale;
   // 未回転矩形の左上(=北西角:北=高 grid y)
-  const svgX = ux_g * scale + padding;
-  const svgY = (gridH - uy_g - k.depth / 910) * scale + padding;
-  const svg_cx = cx_g * scale + padding;
-  const svg_cy = (gridH - cy_g) * scale + padding;
+  const svgX = ux_g * scale + paddingX;
+  const svgY = (gridH - uy_g - k.depth / 910) * scale + paddingY;
+  const svg_cx = cx_g * scale + paddingX;
+  const svg_cy = (gridH - cy_g) * scale + paddingY;
 
   let svg = '';
   svg += `<g transform="rotate(${rotation} ${svg_cx} ${svg_cy})">`;
@@ -1775,7 +2169,7 @@ function renderKitchenInside(ldk, padding, gridH, scale, interactive) {
 }
 
 // キッチン回転ボタンを単独で描画(foreignObject 内の HTML ボタン → SVG イベント問題を回避)
-function renderKitchenRotateButton(ldk, padding, gridH, scale) {
+function renderKitchenRotateButton(ldk, paddingX, paddingY, gridH, scale) {
   const k = ldk.kitchen;
   if (!k) return '';
   const rotation = k.rotation || 0;
@@ -1788,8 +2182,8 @@ function renderKitchenRotateButton(ldk, padding, gridH, scale) {
   const cy_mm = by_mm + bh_mm / 2;
   const cx_g = ldk.x + cx_mm / 910;
   const cy_g = ldk.y + cy_mm / 910;
-  const svg_cx = cx_g * scale + padding;
-  const svg_cy = (gridH - cy_g) * scale + padding;
+  const svg_cx = cx_g * scale + paddingX;
+  const svg_cy = (gridH - cy_g) * scale + paddingY;
   const bw_px = bw_mm / 910 * scale;
   const bh_px = bh_mm / 910 * scale;
   const rotBtnCX = svg_cx + bw_px / 2 + 14;
@@ -1808,7 +2202,7 @@ function renderKitchenRotateButton(ldk, padding, gridH, scale) {
 // 寸法線(土地外周+選択部屋。建物外周はガイド表示)
 function renderDimensions(d, gridW, gridH, scale, selectedRoom, floor) {
   let svg = '';
-  const padding = d.padding;
+  const paddingX = d.paddingX, paddingY = d.paddingY;
   const w = d.buildingW, h = d.buildingH;
   // 土地寸法(土地外周の外側)
   const lwm = d.landW_m.toFixed(1);
@@ -1833,19 +2227,19 @@ function renderDimensions(d, gridW, gridH, scale, selectedRoom, floor) {
   // 建物寸法(建物外周の少し外、土地枠との間に余裕がある場合のみ)
   if (d.landExtraY >= 26) {
     const bw = (gridW * 0.91).toFixed(2);
-    const bsY = padding + h + 12;
-    svg += `<line x1="${padding}" y1="${bsY}" x2="${padding + w}" y2="${bsY}" stroke="#4a4640" stroke-width="0.5"/>`;
-    svg += `<line x1="${padding}" y1="${bsY-3}" x2="${padding}" y2="${bsY+3}" stroke="#4a4640" stroke-width="0.5"/>`;
-    svg += `<line x1="${padding + w}" y1="${bsY-3}" x2="${padding + w}" y2="${bsY+3}" stroke="#4a4640" stroke-width="0.5"/>`;
-    svg += `<text x="${padding + w/2}" y="${bsY-4}" text-anchor="middle" font-size="9" fill="#4a4640" font-family="JetBrains Mono, monospace" letter-spacing="0.5">B ${bw} m</text>`;
+    const bsY = paddingY + h + 12;
+    svg += `<line x1="${paddingX}" y1="${bsY}" x2="${paddingX + w}" y2="${bsY}" stroke="#4a4640" stroke-width="0.5"/>`;
+    svg += `<line x1="${paddingX}" y1="${bsY-3}" x2="${paddingX}" y2="${bsY+3}" stroke="#4a4640" stroke-width="0.5"/>`;
+    svg += `<line x1="${paddingX + w}" y1="${bsY-3}" x2="${paddingX + w}" y2="${bsY+3}" stroke="#4a4640" stroke-width="0.5"/>`;
+    svg += `<text x="${paddingX + w/2}" y="${bsY-4}" text-anchor="middle" font-size="9" fill="#4a4640" font-family="JetBrains Mono, monospace" letter-spacing="0.5">B ${bw} m</text>`;
   }
   if (d.landExtraX >= 26) {
     const bh = (gridH * 0.91).toFixed(2);
-    const bwX = padding - 12;
-    svg += `<line x1="${bwX}" y1="${padding}" x2="${bwX}" y2="${padding + h}" stroke="#4a4640" stroke-width="0.5"/>`;
-    svg += `<line x1="${bwX-3}" y1="${padding}" x2="${bwX+3}" y2="${padding}" stroke="#4a4640" stroke-width="0.5"/>`;
-    svg += `<line x1="${bwX-3}" y1="${padding + h}" x2="${bwX+3}" y2="${padding + h}" stroke="#4a4640" stroke-width="0.5"/>`;
-    const bcy = padding + h/2;
+    const bwX = paddingX - 12;
+    svg += `<line x1="${bwX}" y1="${paddingY}" x2="${bwX}" y2="${paddingY + h}" stroke="#4a4640" stroke-width="0.5"/>`;
+    svg += `<line x1="${bwX-3}" y1="${paddingY}" x2="${bwX+3}" y2="${paddingY}" stroke="#4a4640" stroke-width="0.5"/>`;
+    svg += `<line x1="${bwX-3}" y1="${paddingY + h}" x2="${bwX+3}" y2="${paddingY + h}" stroke="#4a4640" stroke-width="0.5"/>`;
+    const bcy = paddingY + h/2;
     svg += `<text x="${bwX - 4}" y="${bcy}" text-anchor="middle" font-size="9" fill="#4a4640" font-family="JetBrains Mono, monospace" letter-spacing="0.5" transform="rotate(-90 ${bwX - 4} ${bcy})">B ${bh} m</text>`;
   }
 
@@ -1854,12 +2248,12 @@ function renderDimensions(d, gridW, gridH, scale, selectedRoom, floor) {
     const r = selectedRoom;
     const wm = (r.w * 0.91).toFixed(2);
     const hm = (r.h * 0.91).toFixed(2);
-    const x1 = r.x * scale + padding;
-    const x2 = (r.x + r.w) * scale + padding;
-    const y1 = (gridH - r.y - r.h) * scale + padding;
-    const y2 = (gridH - r.y) * scale + padding;
+    const x1 = r.x * scale + paddingX;
+    const x2 = (r.x + r.w) * scale + paddingX;
+    const y1 = (gridH - r.y - r.h) * scale + paddingY;
+    const y2 = (gridH - r.y) * scale + paddingY;
     // 部屋の幅: 建物外側(下、bufferの中ほど)
-    const rsY = (d.landExtraY >= 50) ? padding + h + 32 : padding + h + 14;
+    const rsY = (d.landExtraY >= 50) ? paddingY + h + 32 : paddingY + h + 14;
     svg += `<line x1="${x1}" y1="${y2}" x2="${x1}" y2="${rsY+4}" stroke="#b35a3a" stroke-width="0.6" stroke-dasharray="2,2"/>`;
     svg += `<line x1="${x2}" y1="${y2}" x2="${x2}" y2="${rsY+4}" stroke="#b35a3a" stroke-width="0.6" stroke-dasharray="2,2"/>`;
     svg += `<line x1="${x1}" y1="${rsY}" x2="${x2}" y2="${rsY}" stroke="#b35a3a" stroke-width="1.3"/>`;
@@ -1867,7 +2261,7 @@ function renderDimensions(d, gridW, gridH, scale, selectedRoom, floor) {
     svg += `<line x1="${x2}" y1="${rsY-4}" x2="${x2}" y2="${rsY+4}" stroke="#b35a3a" stroke-width="1.3"/>`;
     svg += `<text x="${(x1+x2)/2}" y="${rsY-5}" text-anchor="middle" font-size="11" fill="#b35a3a" font-weight="700">${wm} m</text>`;
     // 部屋の高さ: 建物外側(左、bufferの中ほど)
-    const rwX = (d.landExtraX >= 50) ? padding - 32 : padding - 14;
+    const rwX = (d.landExtraX >= 50) ? paddingX - 32 : paddingX - 14;
     svg += `<line x1="${x1}" y1="${y1}" x2="${rwX-4}" y2="${y1}" stroke="#b35a3a" stroke-width="0.6" stroke-dasharray="2,2"/>`;
     svg += `<line x1="${x1}" y1="${y2}" x2="${rwX-4}" y2="${y2}" stroke="#b35a3a" stroke-width="0.6" stroke-dasharray="2,2"/>`;
     svg += `<line x1="${rwX}" y1="${y1}" x2="${rwX}" y2="${y2}" stroke="#b35a3a" stroke-width="1.3"/>`;
@@ -1952,6 +2346,16 @@ function computeShapeWarnings(rooms, gridW, gridH, floors) {
       }
     }
   }
+  // 駐車場サイズ判定: 選んだ車種が物理的に駐車できるか
+  for (const r of rooms) {
+    if (r.type !== "駐車場") continue;
+    if (!carFitsInParking(r)) {
+      const car = CAR_SIZES[r.carType || "regular"] || CAR_SIZES.regular;
+      const pLong = (Math.max(r.w, r.h) * 0.91).toFixed(2);
+      const pShort = (Math.min(r.w, r.h) * 0.91).toFixed(2);
+      warnings.push(`${r.floor}F 駐車場が ${car.label} (${car.lenM}m × ${car.widM}m) に対して不足: 現状 ${pLong}m × ${pShort}m`);
+    }
+  }
   return warnings;
 }
 
@@ -1974,6 +2378,8 @@ function computeIssues(rooms, gridW, gridH, floors=null) {
     let oob = 0;
     const oobIds = new Set();
     for (const r of fr) {
+      // 外構(駐車場/庭/ポーチ等)は建物グリッド外への配置を許容
+      if (isExterior(r.type)) continue;
       if (r.x < 0 || r.x + r.w > gridW || r.y < 0 || r.y + r.h > gridH) {
         oob++; oobIds.add(rooms.indexOf(r));
       }
@@ -2187,6 +2593,9 @@ function generate() {
   state.warnings = [];
   state.selectedRoomIdx = null;
   state.swapError = null;
+  // 新規生成は保存元との関連を解除
+  state.saveLoad.loadedFromId = null;
+  state.saveLoad.nameInput = "";
 
   for (const t of TEMPLATES) {
     const errs = validateRooms(t.rooms, t.landGridW, t.landGridH, templateFloors(t));
@@ -2251,13 +2660,67 @@ function loadCandidateAsWorking(idx) {
   state.selectedRoomIdx = null;
 }
 
+// 保存済み一覧の行HTML(actions パネル / 空状態 共通)
+function buildSavedListHtml() {
+  const plans = loadSavedPlans();
+  if (plans.length === 0) {
+    return `<div style="padding:10px 4px;color:var(--ink-soft);font-size:12px;">保存済みの間取り図はまだありません。</div>`;
+  }
+  return plans.map(p => {
+    const dt = new Date(p.createdAt);
+    const dts = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")} ${String(dt.getHours()).padStart(2,"0")}:${String(dt.getMinutes()).padStart(2,"0")}`;
+    const lw = p.input && p.input.landWidthM, lh = p.input && p.input.landHeightM;
+    const fc = p.input && p.input.floorCount;
+    const meta = `${lw||"?"}m × ${lh||"?"}m / ${fc===1?"平屋":fc?fc+"階建":""}`;
+    const safeName = (p.name || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return `<div class="saved-row">
+      <div class="saved-info">
+        <div class="saved-name">${safeName}</div>
+        <div class="saved-meta">${meta} · ${dts}</div>
+      </div>
+      <div class="saved-actions">
+        <button class="saved-load-btn ghost" data-save-id="${p.id}">読込</button>
+        <button class="saved-del-btn ghost" data-save-id="${p.id}">削除</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+function wireSavedListButtons() {
+  document.querySelectorAll(".saved-load-btn").forEach(b => {
+    b.onclick = () => applySavedPlan(b.dataset.saveId);
+  });
+  document.querySelectorAll(".saved-del-btn").forEach(b => {
+    b.onclick = () => {
+      const plans = loadSavedPlans();
+      const p = plans.find(x => x.id === b.dataset.saveId);
+      if (!p) return;
+      if (confirm(`「${p.name}」を削除します。よろしいですか?`)) {
+        deleteSavedPlan(b.dataset.saveId);
+        renderOutput();
+      }
+    };
+  });
+}
+
 function renderOutput() {
   const out = document.getElementById("outputArea");
   if (state.candidates.length === 0) {
     let html = "";
     if (state.warnings.length) html += `<div class="err">` + state.warnings.map(w => `<div>${w}</div>`).join("") + `</div>`;
-    else html += `<div class="empty">候補なし</div>`;
+    else html += `<div class="empty">
+      <span class="em-eye">§ 01 · STAND BY</span>
+      <span class="em-jp">「間取りを生成」を押すと、ここに平面図が並びます。</span>
+      <span class="em-en">Press Generate to draft a plan.</span>
+    </div>`;
+    const plans = loadSavedPlans();
+    if (plans.length > 0) {
+      html += `<div class="save-panel" style="margin-top:14px;">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--sage-deep);margin-bottom:8px;">SAVED · 保存済み (${plans.length}/${MAX_SAVES})</div>
+        <div class="save-panel-list">${buildSavedListHtml()}</div>
+      </div>`;
+    }
     out.innerHTML = html;
+    wireSavedListButtons();
     return;
   }
   const c = state.candidates[state.currentIdx];
@@ -2276,7 +2739,15 @@ function renderOutput() {
     }
     html += `</div>`;
   }
-  html += `<div class="candidate-pager">候補 ${state.currentIdx + 1}/${state.candidates.length} ・ <strong>${t.name}</strong> (${t.id})</div>`;
+  // 保存データから読み込んだ場合は、保存名を強調表示してわかりやすくする
+  const loadedSavedId = state.saveLoad && state.saveLoad.loadedFromId;
+  const loadedSavedPlan = loadedSavedId ? loadSavedPlans().find(p => p.id === loadedSavedId) : null;
+  if (loadedSavedPlan) {
+    const safeNm = (loadedSavedPlan.name || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    html += `<div class="candidate-pager">保存中: <strong>${safeNm}</strong> <span style="color:var(--ink-soft);font-size:11px;letter-spacing:0;">（元テンプレ: ${t.name}）</span></div>`;
+  } else {
+    html += `<div class="candidate-pager">候補 ${state.currentIdx + 1}/${state.candidates.length} ・ <strong>${t.name}</strong> (${t.id})</div>`;
+  }
   // 配置の問題点
   const issues = computeIssues(rooms, t.landGridW, t.landGridH, tFloors);
   const hasIssues = issues.totalOverlap > 0 || issues.totalOOB > 0 || issues.totalGap > 0;
@@ -2321,10 +2792,7 @@ function renderOutput() {
     if (issues.totalOverlap > 0) metricsHtml += `<span class="metric warn">⚠ 重なり ${issues.totalOverlap}件</span>`;
     if (issues.totalGap > 0) metricsHtml += `<span class="metric warn">⚠ すき間 ${issues.totalGap}セル</span>`;
   }
-  html += `<div class="score-info">
-    <div class="metric-row">${metricsHtml}</div>
-    <div style="font-size:11.5px;color:#666;margin-top:6px;">${c.breakdown.join(" / ")}</div>
-  </div>`;
+  // メトリクス(score-info)は間取り図の下に出力するため、ここでは描画しない
 
   // === 上部固定エリア: 操作ボタン・タブ ===
   html += `<div class="actions">`;
@@ -2340,7 +2808,39 @@ function renderOutput() {
     <button id="zoomFitBtn" class="zoom-btn" title="幅に合わせる">フィット</button>
   </div>`;
   html += `<button id="dlBtn">PNGで保存</button>`;
+  const savedCount = loadSavedPlans().length;
+  html += `<button id="saveLoadBtn" class="secondary">${state.saveLoad.open ? "▲ 閉じる" : "▼ 保存・読込"} (${savedCount}/${MAX_SAVES})</button>`;
   html += `</div>`;
+  // 保存・読込パネル
+  if (state.saveLoad.open) {
+    const plans = loadSavedPlans();
+    const atCapacity = plans.length >= MAX_SAVES;
+    const nameVal = (state.saveLoad.nameInput || "").replace(/"/g, "&quot;");
+    const loadedId = state.saveLoad.loadedFromId;
+    const loadedSrc = loadedId ? plans.find(p => p.id === loadedId) : null;
+    // 読込中インジケータ
+    let loadedBadge = "";
+    if (loadedSrc) {
+      const safe = (loadedSrc.name || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      loadedBadge = `<div class="save-loaded-badge">読込中: <strong>${safe}</strong> — このまま「保存」を押すと上書きするか確認します</div>`;
+    }
+    // 入力セル: 上限到達(かつ読込中ではない=上書き不可)時のみメッセージ、それ以外は入力欄
+    const canSave = !atCapacity || !!loadedSrc; // 読込中は上書きできるので満杯でも入力可
+    const inputCell = canSave
+      ? `<input type="text" id="savePlanName" placeholder="この間取りに名前を付ける(任意)" value="${nameVal}" maxlength="40" style="flex:1;padding:6px 8px;font-family:var(--jp-serif);font-size:13px;border:0.5px solid var(--ink-soft);background:var(--bg);">`
+      : `<div class="save-cap-msg">保存上限(${MAX_SAVES}件)に達しています。新しく保存するには、下の一覧からいずれかを削除してください。</div>`;
+    const btnLabel = loadedSrc
+      ? "保存(上書き確認あり)"
+      : (atCapacity ? "上限到達" : "+ 現在の図を保存");
+    html += `<div class="save-panel">
+      ${loadedBadge}
+      <div class="save-panel-row">
+        ${inputCell}
+        <button id="savePlanBtn" class="ghost" ${canSave ? "" : "disabled"}>${btnLabel}</button>
+      </div>
+      <div class="save-panel-list">${buildSavedListHtml()}</div>
+    </div>`;
+  }
   // ビュータブ(間取り図の上) — 階数に応じて動的生成
   // viewMode が現在のテンプレ階数を超える場合は 1F に自動戻し
   const validViewModes = floorsRange(tFloors).map(f => `${f}F`);
@@ -2367,9 +2867,9 @@ function renderOutput() {
       <label>種類:</label>
       <select id="addRoomType">${typeOpts}</select>
       <label>幅:</label>
-      <div><input type="number" id="addRoomW" value="${ar.w}" min="1" max="20" step="1" style="width:60px;"> マス (${(ar.w*0.91).toFixed(2)} m)</div>
+      <div><input type="number" id="addRoomW" value="${ar.w}" min="0.25" max="20" step="0.25" style="width:70px;"> マス (${(ar.w*0.91).toFixed(2)} m)</div>
       <label>縦:</label>
-      <div><input type="number" id="addRoomH" value="${ar.h}" min="1" max="20" step="1" style="width:60px;"> マス (${(ar.h*0.91).toFixed(2)} m)</div>
+      <div><input type="number" id="addRoomH" value="${ar.h}" min="0.25" max="20" step="0.25" style="width:70px;"> マス (${(ar.h*0.91).toFixed(2)} m)</div>
       <div class="full" style="font-size:11px;color:#666;">1 マス = 91 cm (半畳)。表示中の <strong>${targetFloor}F</strong> に追加されます。</div>
       <div class="full actions-row">
         <button id="addRoomConfirm">追加</button>
@@ -2383,7 +2883,16 @@ function renderOutput() {
     const label = (sel.type === "寝室" && sel.role === "main") ? "主寝室" : (OPTION_LABELS[sel.type] || sel.type);
     const wm = (sel.w * 0.91).toFixed(2);
     const hm = (sel.h * 0.91).toFixed(2);
-    html += `<div class="swap-hint">選択中: <strong>${label}</strong> (${sel.floor}F・${wm}m × ${hm}m) — 同じ部屋クリックで解除 / Delete キーまたは <button class="delete-room-btn" id="deleteRoomBtn">× 削除</button> で削除</div>`;
+    let extraControls = "";
+    // 駐車場の場合: 車種切替ボタン
+    if (sel.type === "駐車場") {
+      const cur = sel.carType || "regular";
+      const btn = (val, lbl) => `<button class="car-type-btn ${cur===val?'active':''}" data-car-type="${val}">${lbl}</button>`;
+      extraControls = ` <span class="car-type-switch">車種:
+        ${btn("kei", "軽")}${btn("regular", "普通")}${btn("large", "大型")}
+      </span>`;
+    }
+    html += `<div class="swap-hint">選択中: <strong>${label}</strong> (${sel.floor}F・${wm}m × ${hm}m)${extraControls} — 同じ部屋クリックで解除 / Delete キーまたは <button class="delete-room-btn" id="deleteRoomBtn">× 削除</button> で削除</div>`;
   }
   if (state.warnings.length) {
     html += `<div class="warnings">` + state.warnings.map(w => `<div>${w}</div>`).join("") + `</div>`;
@@ -2410,6 +2919,81 @@ function renderOutput() {
   // 操作ヒント(下部)
   html += `<div class="edit-hint">【自由配置モード】部屋ドラッグで移動 ／ 任意の辺ドラッグでサイズ変更 ／ 部屋クリックで選択(寸法表示) / Delete キーで削除 ／ キッチンドラッグで移動・↻ボタンで回転</div>`;
   html += `<div class="edit-hint" style="background:#f0f5fa;padding:6px 10px;border-radius:4px;font-style:normal;color:#456;"><strong>単位:</strong> 1 マス = 91 cm (半畳・建築の標準モジュール) / ドラッグの最小単位 = 1/4 マス = 22.75 cm (4 グリッド = 1 マス、グリッドはドラッグの最小単位)</div>`;
+  // === メトリクス(直下率・LDK比率など) — 一番下に配置 ===
+  const helpBtnLabel = state.metricsHelpOpen ? "▲ 指標の説明を閉じる" : "▼ 指標の見方";
+  let helpPanelHtml = "";
+  if (state.metricsHelpOpen) {
+    helpPanelHtml = `<div class="metrics-help">
+      <dl>
+        <dt>直下率</dt>
+        <dd><b>計算:</b> 上階の壁のうち、真下(下の階)に同じ位置の壁があるものの割合<br>
+          <b>例:</b> 2Fの壁が100本、そのうち70本が1Fの壁と一致 → 70%<br>
+          <b>目安 ≥60%:</b> 上階の壁を下階の壁で受けると構造的に安定。低いと梁が増え工費も上がる。<br>
+          <b>備考:</b> 平屋では計算対象なし</dd>
+
+        <dt>LDK比率</dt>
+        <dd><b>計算:</b> (LDK + リビング + ダイニング + キッチン)の床面積 ÷ 室内総床面積<br>
+          <b>目安 25-35%:</b> 家全体に対するくつろぎ空間の割合。低いと窮屈、高すぎると個室や収納が圧迫される。</dd>
+
+        <dt>収納率</dt>
+        <dd><b>計算:</b> (SC + 土間収納 + WIC + 物入)の床面積 ÷ 室内総床面積<br>
+          <b>目安 10-15%:</b> 一般的に「12%以上で快適」と言われる。多いほど物が片付きやすい。</dd>
+
+        <dt>廊下率</dt>
+        <dd><b>計算:</b> (廊下 + ホール)の床面積 ÷ 室内総床面積<br>
+          <b>目安 &lt;12%:</b> 廊下はデッドスペース。低いほど効率的な間取り。</dd>
+
+        <dt>有効率</dt>
+        <dd><b>計算:</b> (室内総床面積 − 廊下 − 階段) ÷ 室内総床面積<br>
+          <b>意味:</b> 実際に「居室・水回り・収納などとして使える」面積の割合。1から「移動だけに使う面積」を引いた値。<br>
+          <b>目安 ≥70%:</b> 高いほど無駄が少ない間取り。<br>
+          <b>例:</b> 100㎡のうち廊下8㎡・階段5㎡なら、有効率 = (100−8−5)÷100 = 87%</dd>
+
+        <dt>建蔽率(けんぺいりつ)</dt>
+        <dd><b>計算:</b> 1階の建築面積 ÷ 敷地面積<br>
+          <b>意味:</b> 敷地のうち建物が地面を覆っている割合(法律で地域ごとに上限あり)。<br>
+          <b>備考:</b> 入力欄「建蔽率上限」と比較して判定 / 外構(駐車場・庭など)は含まない</dd>
+
+        <dt>容積率(ようせきりつ)</dt>
+        <dd><b>計算:</b> 延床面積(全階の合計) ÷ 敷地面積<br>
+          <b>意味:</b> 敷地に対してどれだけ床面積を確保しているか(法律で地域ごとに上限あり)。<br>
+          <b>備考:</b> 入力欄「容積率上限」と比較して判定 / 吹抜・外構は含まない</dd>
+
+        <dt>スコア</dt>
+        <dd><b>計算:</b> テンプレマッチ度・部屋構成・配置による独自の総合点(高いほど良い)。<br>
+          <b>備考:</b> 保存データの読込時は 0 が表示されます(候補比較用の内部指標のため)。</dd>
+      </dl>
+      <div class="metrics-help-note">※ 1グリッド = 半畳 = 0.91m × 0.91m / 吹抜と外構ゾーンは延床面積から除外しています。</div>
+    </div>`;
+  }
+  // === 面積サマリ (敷地・各階・延床・LDK) ===
+  const M2_PER_GRID = 0.91 * 0.91;
+  const landAreaM2 = (state.lastInput.landWidthM || 0) * (state.lastInput.landHeightM || 0);
+  let areaRows = `<div class="area-row"><span class="area-lbl">敷地面積</span> ${formatAreaPair(landAreaM2)}</div>`;
+  let totalFloorM2 = 0;
+  for (const f of floorsRange(tFloors)) {
+    const fM2 = floorAreaGridFor(rooms, f) * M2_PER_GRID;
+    totalFloorM2 += fM2;
+    areaRows += `<div class="area-row"><span class="area-lbl">${f}F床面積</span> ${formatAreaPair(fM2)}</div>`;
+  }
+  areaRows += `<div class="area-row total"><span class="area-lbl">延べ床面積</span> ${formatAreaPair(totalFloorM2)}</div>`;
+  // LDK合計 (LDK + リビング + ダイニング + キッチン)
+  const ldkGrids = rooms
+    .filter(r => LDK_TYPES.includes(r.type))
+    .reduce((s, r) => s + r.w * r.h, 0);
+  const ldkM2 = ldkGrids * M2_PER_GRID;
+  const ldkTatami = ldkGrids / 2; // 1畳 = 2グリッド(半畳×2)
+  const tatamiStr = `<span style="color:var(--ink-soft);font-family:var(--mono);font-size:11px;">/ ${ldkTatami.toFixed(1)} 畳</span>`;
+  areaRows += `<div class="area-row sub"><span class="area-lbl">LDK面積</span> ${formatAreaPair(ldkM2)} ${tatamiStr}</div>`;
+  const areaSummaryHtml = `<div class="area-summary">${areaRows}</div>`;
+
+  html += `<div class="score-info">
+    ${areaSummaryHtml}
+    <div class="metric-row">${metricsHtml}</div>
+    <div style="font-size:11.5px;color:#666;margin-top:6px;">${c.breakdown.join(" / ")}</div>
+    <div style="margin-top:10px;"><button id="metricsHelpBtn" class="ghost" style="padding:4px 10px;font-size:10px;">${helpBtnLabel}</button></div>
+    ${helpPanelHtml}
+  </div>`;
   out.innerHTML = html;
 
   const nb = document.getElementById("nextBtn");
@@ -2425,6 +3009,48 @@ function renderOutput() {
     updateOptionStatus();
   };
   document.getElementById("dlBtn").onclick = exportPNG;
+  // 保存・読込パネル
+  const slBtn = document.getElementById("saveLoadBtn");
+  if (slBtn) slBtn.onclick = () => {
+    state.saveLoad.open = !state.saveLoad.open;
+    renderOutput();
+  };
+  const sName = document.getElementById("savePlanName");
+  if (sName) {
+    sName.oninput = (e) => { state.saveLoad.nameInput = e.target.value; };
+    sName.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); document.getElementById("savePlanBtn")?.click(); } };
+  }
+  const sBtn = document.getElementById("savePlanBtn");
+  if (sBtn) sBtn.onclick = () => {
+    const loadedId = state.saveLoad.loadedFromId;
+    const plans = loadSavedPlans();
+    const loadedSrc = loadedId ? plans.find(p => p.id === loadedId) : null;
+    if (loadedSrc) {
+      const ok = confirm(`「${loadedSrc.name}」に上書き保存しますか?\n\nOK   : 上書き保存\nキャンセル : 別の保存として追加(新規)`);
+      if (ok) {
+        if (overwriteSavedPlan(loadedId, state.saveLoad.nameInput)) {
+          renderOutput();
+        }
+        return;
+      }
+      // 新規として追加へフォールスルー
+      if (plans.length >= MAX_SAVES) {
+        alert(`新規保存は最大 ${MAX_SAVES} 件までです。上書き保存にするか、不要なものを削除してください。`);
+        return;
+      }
+    }
+    const newId = saveCurrentPlan(state.saveLoad.nameInput);
+    if (newId) {
+      state.saveLoad.loadedFromId = newId; // 続けて上書き可能にする
+      renderOutput();
+    }
+  };
+  wireSavedListButtons();
+  const hBtn = document.getElementById("metricsHelpBtn");
+  if (hBtn) hBtn.onclick = () => {
+    state.metricsHelpOpen = !state.metricsHelpOpen;
+    renderOutput();
+  };
   // ズームボタン
   const zOut = document.getElementById("zoomOutBtn");   if (zOut)  zOut.onclick  = zoomOut;
   const zIn  = document.getElementById("zoomInBtn");    if (zIn)   zIn.onclick   = zoomIn;
@@ -2446,9 +3072,16 @@ function renderOutput() {
     renderOutput();
   };
   const arW = document.getElementById("addRoomW");
-  if (arW) arW.onchange = (e) => { state.addRoom.w = parseInt(e.target.value, 10) || 1; };
+  if (arW) arW.onchange = (e) => {
+    // 1/4 マス単位で受け付け、最低 0.25 を保証
+    const v = parseFloat(e.target.value);
+    state.addRoom.w = Math.max(0.25, Math.round((isFinite(v) ? v : 1) * 4) / 4);
+  };
   const arH = document.getElementById("addRoomH");
-  if (arH) arH.onchange = (e) => { state.addRoom.h = parseInt(e.target.value, 10) || 1; };
+  if (arH) arH.onchange = (e) => {
+    const v = parseFloat(e.target.value);
+    state.addRoom.h = Math.max(0.25, Math.round((isFinite(v) ? v : 1) * 4) / 4);
+  };
   const arConf = document.getElementById("addRoomConfirm");
   if (arConf) arConf.onclick = () => {
     // 表示中の階に追加(オーバーレイ時は 1F)
@@ -2467,6 +3100,18 @@ function renderOutput() {
   if (drb) drb.onclick = () => {
     if (state.selectedRoomIdx !== null) deleteRoomFromWorking(state.selectedRoomIdx);
   };
+  // 駐車場の車種切替ボタン
+  document.querySelectorAll(".car-type-btn").forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      if (state.selectedRoomIdx === null) return;
+      const sel = state.workingRooms[state.selectedRoomIdx];
+      if (!sel || sel.type !== "駐車場") return;
+      sel.carType = btn.getAttribute("data-car-type");
+      renderOutput();
+      updateOptionStatus();
+    };
+  });
   document.querySelectorAll(".view-tabs button").forEach(btn => {
     btn.addEventListener("click", () => {
       state.viewMode = btn.getAttribute("data-view");
@@ -2599,10 +3244,8 @@ function bindKitchenInteractions() {
     el.addEventListener("mousedown", onKitchenMouseDown);
   });
   const rotEls = document.querySelectorAll('[data-kitchen-rotate="1"]');
-  console.log("[BIND] 回転ボタン要素数:", rotEls.length);
   rotEls.forEach(el => {
     const handler = (e) => {
-      console.log("[ROT-HANDLER] イベント受信:", e.type);
       e.stopPropagation();
       e.preventDefault();
       onKitchenRotate(e);
@@ -2656,17 +3299,11 @@ function onKitchenMouseUp() {
 }
 
 function onKitchenRotate(evt) {
-  console.log("[ROTATE] onKitchenRotate 呼び出し ", evt && evt.type, evt && evt.target);
   if (evt) { evt.stopPropagation && evt.stopPropagation(); evt.preventDefault && evt.preventDefault(); }
   const ldk = findLDK();
-  console.log("[ROTATE] LDK:", ldk);
-  if (!ldk || !ldk.kitchen) {
-    console.warn("[ROTATE] LDKまたはkitchenが見つからない");
-    return;
-  }
+  if (!ldk || !ldk.kitchen) return;
   const oldRot = ldk.kitchen.rotation || 0;
   const newRot = (oldRot + 90) % 360;
-  console.log("[ROTATE] rotation変化:", oldRot, "→", newRot);
   // bbox 寸法が変わる場合は中心を保つよう SW を調整
   const oldIsRot90 = (oldRot % 180 !== 0);
   const newIsRot90 = (newRot % 180 !== 0);
@@ -2681,28 +3318,15 @@ function onKitchenRotate(evt) {
     ldk.kitchen.y_mm = cy - newBh / 2;
   }
   ldk.kitchen.rotation = newRot;
-  console.log("[ROTATE] 適用後kitchen:", JSON.parse(JSON.stringify(ldk.kitchen)));
   renderOutput();
   updateOptionStatus();
 }
 
 // インライン onclick で使用するグローバル関数
 window.__rotKitchen = function(e) {
-  console.log("[INLINE] foreignObject ボタンから回転");
   if (e && e.stopPropagation) e.stopPropagation();
   if (e && e.preventDefault) e.preventDefault();
   onKitchenRotate(e || {});
-};
-// デバッグ用: コンソールから手動実行可
-window.__debugRotateKitchen = function() {
-  console.log("[DEBUG] 手動回転実行");
-  onKitchenRotate({ stopPropagation: ()=>{}, preventDefault: ()=>{}, type: "manual" });
-};
-window.__debugInspectKitchen = function() {
-  const ldk = findLDK();
-  console.log("[DEBUG] LDK:", ldk);
-  console.log("[DEBUG] kitchen:", ldk && ldk.kitchen);
-  console.log("[DEBUG] data-kitchen-rotate要素数:", document.querySelectorAll('[data-kitchen-rotate="1"]').length);
 };
 
 // ============ Edge Drag ============
@@ -2748,20 +3372,22 @@ function onEdgeMouseMove(evt) {
     renderOutput(); updateOptionStatus(); return;
   }
   // 自由配置モード: dragged room のみリサイズ。他の部屋はそのまま。
+  // 最小サイズは 1/4 マス (=22.75cm, 1グリッド) まで縮められる
+  const MIN_SIZE = 0.25;
   const next = initialRooms.map(r => ({ ...r }));
   const target = next[e.roomIdx];
   if (e.side === "east") {
     const newW = target.w + dGrid;
-    if (newW >= 1) target.w = newW;
+    if (newW >= MIN_SIZE) target.w = newW;
   } else if (e.side === "west") {
     const newW = target.w + dGrid;
-    if (newW >= 1) { target.x = target.x - dGrid; target.w = newW; }
+    if (newW >= MIN_SIZE) { target.x = target.x - dGrid; target.w = newW; }
   } else if (e.side === "north") {
     const newH = target.h + dGrid;
-    if (newH >= 1) target.h = newH;
+    if (newH >= MIN_SIZE) target.h = newH;
   } else if (e.side === "south") {
     const newH = target.h + dGrid;
-    if (newH >= 1) { target.y = target.y - dGrid; target.h = newH; }
+    if (newH >= MIN_SIZE) { target.y = target.y - dGrid; target.h = newH; }
   }
   target.tatami = (target.w * target.h) / 2;
   state.workingRooms = next;
@@ -2914,6 +3540,22 @@ async function exportPNG() {
 
 // ============ Init ============
 renderOptionsUI();
+// 初期表示: 保存済みプランがあれば最新の(直近で編集した)ものを自動読込、
+// なければ初回サンプル生成。グローバルフラグで後段の generate() を抑止する。
+window.__autoLoadedSaved = false;
+(function initialLoad() {
+  try {
+    const plans = loadSavedPlans();
+    if (plans.length === 0) return; // 末尾の generate() に任せる
+    const latest = plans.slice().sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""))[0];
+    if (latest && applySavedPlan(latest.id)) {
+      window.__autoLoadedSaved = true; // 自動生成をスキップ
+      renderOutput(); // 念のため再描画
+    }
+  } catch (e) {
+    console.error("[init] 初期読込に失敗しました:", e);
+  }
+})();
 document.getElementById("generateBtn").onclick = generate;
 // 階数変更時は部屋オプションUIを再生成
 const floorCountEl = document.getElementById("floorCount");
@@ -2946,7 +3588,6 @@ document.addEventListener("mousedown", (e) => {
   let target = e.target;
   while (target && target !== document.body) {
     if (target.getAttribute && target.getAttribute("data-kitchen-rotate") === "1") {
-      console.log("[DOC-CAPTURE] 回転ボタン捕捉(mousedown)");
       e.stopPropagation();
       e.preventDefault();
       onKitchenRotate(e);
@@ -2959,7 +3600,6 @@ document.addEventListener("click", (e) => {
   let target = e.target;
   while (target && target !== document.body) {
     if (target.getAttribute && target.getAttribute("data-kitchen-rotate") === "1") {
-      console.log("[DOC-CAPTURE] 回転ボタン捕捉(click)");
       e.stopPropagation();
       e.preventDefault();
       onKitchenRotate(e);
@@ -3007,7 +3647,8 @@ function applyRegulationChange() {
 document.getElementById("maxCoverage").addEventListener("change", applyRegulationChange);
 document.getElementById("maxFAR").addEventListener("change", applyRegulationChange);
 
-generate();
+// 保存済みプランを自動読込していない場合のみ、初回サンプルを生成
+if (!window.__autoLoadedSaved) generate();
 </script>
 </body>
 </html>

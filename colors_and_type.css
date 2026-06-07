@@ -11,7 +11,12 @@
  * exposed via a [data-palette] attribute on the root.
  * ---------------------------------------------------------------------------- */
 
+/* Google Fonts はオフライン環境でも動作するよう外部読込を停止。
+   下の --serif / --jp-serif / --sans / --mono は system-ui / serif / monospace に
+   フォールバックされる。オンライン環境でブランドフォントを使いたい場合は
+   この行のコメントを解除してください。
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+*/
 
 /* ── Default palette: wood‑natural (canonical) ─────────────────────────────── */
 :root,
