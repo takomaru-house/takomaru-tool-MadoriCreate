@@ -727,6 +727,157 @@
     .panel.input-panel { border-right: 0; padding-right: 0; }
     .panel { padding: 18px 0 28px; }
   }
+
+  /* ── Onboarding: "使い方を見る" button in masthead ─────────────────────── */
+  .howto-btn {
+    align-self: center;
+    margin-left: auto;
+    background: transparent;
+    border: 0.5px solid var(--ink-soft);
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--dur-quick) var(--ease),
+                color var(--dur-quick) var(--ease),
+                border-color var(--dur-quick) var(--ease);
+  }
+  .howto-btn:hover {
+    color: var(--ink);
+    border-color: var(--ink);
+    background: var(--paper);
+  }
+  /* Push colophon to sit next to (not auto-margin away from) the help button */
+  .masthead > .colophon { margin-left: 16px; }
+
+  /* ── Onboarding: spotlight overlay + tooltip card ─────────────────────── */
+  .onboard-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    pointer-events: none;
+  }
+  .onboard-overlay.is-active { display: block; }
+  .onboard-mask {
+    position: absolute;
+    background: rgba(20, 18, 16, 0.58);
+    pointer-events: auto;
+    transition: top var(--dur) var(--ease),
+                left var(--dur) var(--ease),
+                width var(--dur) var(--ease),
+                height var(--dur) var(--ease),
+                bottom var(--dur) var(--ease),
+                right var(--dur) var(--ease);
+  }
+  .onboard-spot {
+    position: absolute;
+    border: 1.5px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--ink),
+                0 10px 32px rgba(0, 0, 0, 0.32);
+    border-radius: 3px;
+    pointer-events: none;
+    transition: top var(--dur) var(--ease),
+                left var(--dur) var(--ease),
+                width var(--dur) var(--ease),
+                height var(--dur) var(--ease);
+  }
+  .onboard-tip {
+    position: absolute;
+    background: var(--bg);
+    border: 0.5px solid var(--ink);
+    padding: 18px 20px 14px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    width: 320px;
+    max-width: calc(100vw - 32px);
+    pointer-events: auto;
+    transition: top var(--dur) var(--ease),
+                left var(--dur) var(--ease);
+  }
+  .onboard-tip-eye {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sage-deep);
+    margin-bottom: 10px;
+  }
+  .onboard-tip-title {
+    font-family: var(--jp-serif);
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+  .onboard-tip-body {
+    font-family: var(--jp-serif);
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+  }
+  .onboard-tip-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 0.5px solid var(--rule);
+  }
+  .onboard-tip-actions button {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 7px 12px;
+    background: transparent;
+    border: 0.5px solid var(--ink-soft);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background var(--dur-quick) var(--ease),
+                color var(--dur-quick) var(--ease),
+                border-color var(--dur-quick) var(--ease);
+  }
+  .onboard-tip-actions button:hover:not(:disabled) {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
+  }
+  .onboard-tip-actions button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .onboard-tip-actions .onboard-skip {
+    border: none;
+    padding: 4px 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    color: var(--ink-soft);
+  }
+  .onboard-tip-actions .onboard-skip:hover:not(:disabled) {
+    background: transparent;
+    color: var(--ink);
+  }
+  .onboard-nav { display: flex; gap: 8px; }
+  .onboard-nav .onboard-next {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .onboard-nav .onboard-next:hover:not(:disabled) {
+    background: var(--wood-deep);
+    border-color: var(--wood-deep);
+    color: var(--bg);
+  }
+  @media (max-width: 980px) {
+    .howto-btn { font-size: 9px; padding: 4px 8px; }
+    .onboard-tip { width: calc(100vw - 32px); }
+  }
 </style>
 </head>
 <body>
@@ -737,6 +888,7 @@
     <div class="jp">間取り生成ツール</div>
     <div class="eye">§ 02 · TOOLS / 道具</div>
   </div>
+  <button id="howtoBtn" class="howto-btn" type="button" title="使い方ガイドを開く">? HOW TO · 使い方</button>
   <div class="colophon">an in-browser sketch of a house. 
 敷地条件と要件を入力し、間取りを生成して編集できます。</div>
 </section>
@@ -746,7 +898,7 @@
       <div class="panel-eye"><span class="num">A.</span> <span>INPUT · 入力</span></div>
       <h2 style="font-size: 30px">Inputs</h2>
       <div class="jp-sub">敷地と要件</div>
-      <div class="input-block">
+      <div class="input-block" data-onboard="site">
         <h3><span>S/01</span> <span class="jp">土地 / Site</span></h3>
         <div class="row"><label>横 <input type="number" id="landW" value="11" min="5" max="30" step="0.1"> m</label></div>
         <div class="row"><label>縦 <input type="number" id="landH" value="10" min="5" max="30" step="0.1"> m</label></div>
@@ -786,7 +938,7 @@
         </label></div>
       </div>
 
-      <div class="input-block">
+      <div class="input-block" data-onboard="rooms">
         <h3><span>S/02</span> <span class="jp">主要部屋 / Rooms</span></h3>
         <div class="row"><label>LDK
           <select id="ldkSize">
@@ -798,7 +950,7 @@
         </label></div>
       </div>
 
-      <div class="input-block">
+      <div class="input-block" data-onboard="placement">
         <h3><span>S/03</span> <span class="jp">建物配置 / Placement</span> <span class="note">境界から最低50cm</span></h3>
         <div class="row"><label>縦
           <select id="bpV">
@@ -833,7 +985,7 @@
         </label></div>
       </div>
 
-      <div class="input-block">
+      <div class="input-block" data-onboard="options">
         <h3><span>S/05</span> <span class="jp">間取りオプション / Programme</span></h3>
         <div class="options" id="optionsContainer"></div>
       </div>
@@ -3827,6 +3979,269 @@ document.getElementById("maxFAR").addEventListener("change", applyRegulationChan
 
 // 保存済みプランを自動読込していない場合のみ、初回サンプルを生成
 if (!window.__autoLoadedSaved) generate();
+
+// ============ Onboarding Tour ============
+(function setupOnboardingTour() {
+  const ONBOARD_KEY = "madori_onboarded_v1";
+
+  const STEPS = [
+    {
+      sel: '[data-onboard="site"]',
+      eye: "STEP 1 / 7 · 土地",
+      title: "敷地条件を入力",
+      body: "土地の横/縦寸法、接道方向、階数、外構プリセット、法定の建蔽率と容積率をここで設定します。最初に土地の形を決めます。",
+      side: "right"
+    },
+    {
+      sel: '[data-onboard="rooms"]',
+      eye: "STEP 2 / 7 · 部屋",
+      title: "主要な部屋の広さ",
+      body: "LDK と主寝室の広さ（畳数）を選びます。選んだサイズに合うテンプレートが候補として呼び出されます。",
+      side: "right"
+    },
+    {
+      sel: '[data-onboard="placement"]',
+      eye: "STEP 3 / 7 · 配置",
+      title: "建物を敷地のどこに置くか",
+      body: "敷地の中で建物を北寄せ・中央・南寄せ／西寄せ・中央・東寄せのどこに配置するかを決めます。下にある「キッチン」ブロックでキッチンの向きも合わせて調整できます。",
+      side: "right"
+    },
+    {
+      sel: '[data-onboard="options"]',
+      eye: "STEP 4 / 7 · オプション",
+      title: "間取りオプションを選ぶ",
+      body: "書斎、バルコニー、ウォークインクローゼットなど、追加したい間取り要素にチェックを入れます。テンプレートが対応していないものは無効表示になります。",
+      side: "right"
+    },
+    {
+      sel: "#generateBtn",
+      eye: "STEP 5 / 7 · 生成",
+      title: "間取りを生成する",
+      body: "ここを押すと、入力した条件に合うテンプレートを組み合わせて間取り図を生成します。右側に候補プランが表示されます。",
+      side: "right"
+    },
+    {
+      sel: "#addRoomBtn",
+      eye: "STEP 6 / 7 · 編集",
+      title: "出力を編集する",
+      body: "「+ 部屋を追加」で部屋を足したり、「別案を見る」で他のテンプレート候補に切り替えたりできます。ズームで詳細を確認しつつ、図上の部屋をクリックすれば直接編集できます。",
+      side: "left",
+      before: ensureGenerated
+    },
+    {
+      sel: "#saveLoadBtn",
+      eye: "STEP 7 / 7 · 保存",
+      title: "ブラウザに保存・読込",
+      body: "現在の間取りに名前を付けて、お使いのブラウザ内に保存できます。あとからここを開いて呼び戻したり、削除したりすることができます。",
+      side: "left",
+      before: ensureGenerated
+    }
+  ];
+
+  let currentStep = 0;
+  let overlayEl = null;
+
+  function isOnboarded() {
+    try { return localStorage.getItem(ONBOARD_KEY) === "1"; }
+    catch (e) { return false; }
+  }
+  function markOnboarded() {
+    try { localStorage.setItem(ONBOARD_KEY, "1"); } catch (e) {}
+  }
+
+  function ensureGenerated() {
+    const empty = document.querySelector("#outputArea .empty");
+    if (empty) {
+      const btn = document.getElementById("generateBtn");
+      if (btn) btn.click();
+    }
+  }
+
+  function buildOverlay() {
+    if (overlayEl) return overlayEl;
+    const root = document.createElement("div");
+    root.className = "onboard-overlay";
+    root.innerHTML = `
+      <div class="onboard-mask" data-side="top"></div>
+      <div class="onboard-mask" data-side="bottom"></div>
+      <div class="onboard-mask" data-side="left"></div>
+      <div class="onboard-mask" data-side="right"></div>
+      <div class="onboard-spot"></div>
+      <div class="onboard-tip" role="dialog" aria-modal="true" aria-labelledby="onboardTipTitle">
+        <div class="onboard-tip-eye"></div>
+        <div class="onboard-tip-title" id="onboardTipTitle"></div>
+        <div class="onboard-tip-body"></div>
+        <div class="onboard-tip-actions">
+          <button type="button" class="onboard-skip">閉じる</button>
+          <div class="onboard-nav">
+            <button type="button" class="onboard-prev">← 戻る</button>
+            <button type="button" class="onboard-next">次へ →</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(root);
+    root.querySelector(".onboard-skip").addEventListener("click", endTour);
+    root.querySelector(".onboard-prev").addEventListener("click", prevStep);
+    root.querySelector(".onboard-next").addEventListener("click", nextStep);
+    document.addEventListener("keydown", onKeyDown);
+    overlayEl = root;
+    return root;
+  }
+
+  function onKeyDown(e) {
+    if (!overlayEl || !overlayEl.classList.contains("is-active")) return;
+    if (e.key === "Escape") { e.preventDefault(); endTour(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); nextStep(); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); prevStep(); }
+  }
+
+  let trackRafId = null;
+  let prevRectKey = "";
+
+  function cancelTracking() {
+    if (trackRafId !== null) cancelAnimationFrame(trackRafId);
+    trackRafId = null;
+    prevRectKey = "";
+  }
+
+  function showStep(i) {
+    if (i < 0 || i >= STEPS.length) { endTour(); return; }
+    cancelTracking();
+    currentStep = i;
+    const step = STEPS[i];
+    if (typeof step.before === "function") step.before();
+    // Let any re-render settle before scrolling/measuring
+    setTimeout(() => beginStep(step, i), 60);
+  }
+
+  function beginStep(step, i) {
+    const target = document.querySelector(step.sel);
+    if (!target) {
+      // Skip missing target (e.g. output not yet rendered for some reason)
+      if (i < STEPS.length - 1) showStep(i + 1);
+      else endTour();
+      return;
+    }
+
+    const overlay = buildOverlay();
+    overlay.classList.add("is-active");
+
+    // Static content (tip text + button states) — only update once per step
+    const tip = overlay.querySelector(".onboard-tip");
+    tip.querySelector(".onboard-tip-eye").textContent = step.eye;
+    tip.querySelector(".onboard-tip-title").textContent = step.title;
+    tip.querySelector(".onboard-tip-body").textContent = step.body;
+    const prevBtn = tip.querySelector(".onboard-prev");
+    const nextBtn = tip.querySelector(".onboard-next");
+    prevBtn.disabled = (i === 0);
+    nextBtn.textContent = (i === STEPS.length - 1) ? "完了" : "次へ →";
+
+    // Bring target into view
+    target.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+
+    // Start rAF tracking so spotlight follows the target through scroll + sticky
+    function tick() {
+      if (!overlayEl || !overlayEl.classList.contains("is-active")) {
+        trackRafId = null;
+        return;
+      }
+      // Re-resolve target in case the output panel re-rendered (e.g. after generate)
+      const t = document.querySelector(step.sel);
+      if (!t) {
+        trackRafId = requestAnimationFrame(tick);
+        return;
+      }
+      const rect = t.getBoundingClientRect();
+      const key = rect.left + "_" + rect.top + "_" + rect.width + "_" + rect.height;
+      if (key !== prevRectKey) {
+        prevRectKey = key;
+        layoutForRect(rect, step);
+      }
+      trackRafId = requestAnimationFrame(tick);
+    }
+    trackRafId = requestAnimationFrame(tick);
+  }
+
+  function layoutForRect(rect, step) {
+    if (!overlayEl) return;
+    const pad = 8;
+    const x = Math.max(0, Math.floor(rect.left - pad));
+    const y = Math.max(0, Math.floor(rect.top - pad));
+    const w = Math.ceil(rect.width + pad * 2);
+    const h = Math.ceil(rect.height + pad * 2);
+
+    const masks = overlayEl.querySelectorAll(".onboard-mask");
+    Object.assign(masks[0].style, { top: "0px", left: "0px", right: "0px", bottom: "auto", width: "auto", height: y + "px" });
+    Object.assign(masks[1].style, { top: (y + h) + "px", left: "0px", right: "0px", bottom: "0px", width: "auto", height: "auto" });
+    Object.assign(masks[2].style, { top: y + "px", left: "0px", right: "auto", bottom: "auto", width: x + "px", height: h + "px" });
+    Object.assign(masks[3].style, { top: y + "px", left: (x + w) + "px", right: "0px", bottom: "auto", width: "auto", height: h + "px" });
+
+    const spot = overlayEl.querySelector(".onboard-spot");
+    Object.assign(spot.style, { top: y + "px", left: x + "px", width: w + "px", height: h + "px" });
+
+    // Position tip
+    const tip = overlayEl.querySelector(".onboard-tip");
+    const tipRect = tip.getBoundingClientRect();
+    const tipW = tipRect.width;
+    const tipH = tipRect.height;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const gap = 16;
+
+    let tipLeft, tipTop;
+    if (step.side === "right") {
+      tipLeft = x + w + gap;
+      if (tipLeft + tipW > vw - 16) {
+        tipLeft = Math.max(16, Math.min(x, vw - tipW - 16));
+        tipTop = y + h + gap;
+      } else {
+        tipTop = y;
+      }
+    } else {
+      tipLeft = x - tipW - gap;
+      if (tipLeft < 16) {
+        tipLeft = Math.max(16, Math.min(x, vw - tipW - 16));
+        tipTop = y + h + gap;
+      } else {
+        tipTop = y;
+      }
+    }
+    if (tipTop + tipH > vh - 16) {
+      tipTop = Math.max(16, y - tipH - gap);
+      if (tipTop < 16) tipTop = Math.max(16, vh - tipH - 16);
+    }
+    tip.style.left = tipLeft + "px";
+    tip.style.top = tipTop + "px";
+  }
+
+  function nextStep() {
+    if (currentStep >= STEPS.length - 1) { endTour(); return; }
+    showStep(currentStep + 1);
+  }
+  function prevStep() {
+    if (currentStep <= 0) return;
+    showStep(currentStep - 1);
+  }
+  function endTour() {
+    cancelTracking();
+    if (overlayEl) overlayEl.classList.remove("is-active");
+    markOnboarded();
+  }
+  function startTour() {
+    currentStep = 0;
+    showStep(0);
+  }
+
+  // "使い方を見る" button — always re-invokable
+  const howtoBtn = document.getElementById("howtoBtn");
+  if (howtoBtn) howtoBtn.addEventListener("click", startTour);
+
+  // First-visit auto-launch
+  if (!isOnboarded()) {
+    setTimeout(startTour, 700);
+  }
+})();
 </script>
 </body>
 </html>
