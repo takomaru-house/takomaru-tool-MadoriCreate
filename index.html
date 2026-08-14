@@ -3609,14 +3609,8 @@ function onRoomMouseMove(evt) {
     const target = next[roomDragState.startIdx];
     target.x = target.x + dGridX;
     target.y = target.y + dGridY;
-    // 建物内部の部屋(外構タイプ以外)は建物グリッド範囲外へドラッグできないようクランプする。
-    // 範囲チェック無しで自由移動できることが「はみだし」判定される部屋を作れてしまう原因だった。
-    // 外構タイプ(駐車場・テラス等)は敷地の余白(建物グリッドの外)に配置する運用のため対象外。
-    const t = state.workingTemplate;
-    if (t && !isExterior(target.type)) {
-      target.x = Math.min(Math.max(target.x, 0), t.landGridW - target.w);
-      target.y = Math.min(Math.max(target.y, 0), t.landGridH - target.h);
-    }
+    // 意図的に範囲制限なし: 編集中は建物グリッドの外にも自由に(一時置き等)動かせる。
+    // 範囲外のままになった部屋は「はみだし」警告(isOOB表示)で知らせるに留め、移動自体は妨げない。
     state.workingRooms = next;
     renderOutput();
     updateOptionStatus();
@@ -3848,20 +3842,6 @@ function bindGridEdgeDrag() {
   });
 }
 
-// axis: "x" or "y"。非外構タイプの部屋について、その軸の下限(最小座標)と上限(座標+サイズの最大値)を返す。
-// 部屋が無い場合は [0, 0] (制約なし相当)。
-function nonExteriorExtent(rooms, axis) {
-  const sizeKey = axis === "x" ? "w" : "h";
-  let minOrigin = null, maxExtent = 0;
-  for (const r of rooms) {
-    if (isExterior(r.type)) continue;
-    const o = r[axis], e = r[axis] + r[sizeKey];
-    if (minOrigin === null || o < minOrigin) minOrigin = o;
-    if (e > maxExtent) maxExtent = e;
-  }
-  return { minOrigin: minOrigin === null ? 0 : minOrigin, maxExtent };
-}
-
 function onGridEdgeMouseDown(evt) {
   evt.preventDefault();
   evt.stopPropagation();
@@ -3881,6 +3861,11 @@ function onGridEdgeMouseDown(evt) {
   document.addEventListener("mouseup", onGridEdgeMouseUp);
 }
 
+// レンダリングが壊れない(SVGの負width/height等にならない)ための最低限のガード。
+// 既存部屋を切り詰めない・土地サイズを超えない、といった編集上の制約はあえて課さない
+// (自由に試行錯誤できることを優先し、はみ出した部屋は警告表示だけで知らせる)。
+const MIN_GRID_SIZE = 0.25;
+
 function onGridEdgeMouseMove(evt) {
   if (!gridDragState) return;
   const t = state.workingTemplate;
@@ -3890,7 +3875,6 @@ function onGridEdgeMouseMove(evt) {
   const dy = evt.clientY - gridDragState.startMouseY;
   const SNAP = 4; // 1/4グリッド(22.75cm)単位
   const _sc = currentScale();
-  const li = state.lastInput;
   // 部屋のedge-handleと同じ符号の取り方(西・北ドラッグは符号反転)
   let dGrid = 0;
   if (side === "east")  dGrid =  Math.round(dx / _sc * SNAP) / SNAP;
@@ -3899,41 +3883,18 @@ function onGridEdgeMouseMove(evt) {
   if (side === "south") dGrid =  Math.round(dy / _sc * SNAP) / SNAP;
 
   if (side === "east" || side === "west") {
-    const axis = "x";
-    const { minOrigin, maxExtent } = nonExteriorExtent(initialRooms, axis);
-    const landMax = (li && li.landWidthM > 0) ? li.landWidthM : Infinity;
-    let growth = dGrid;
-    if (side === "east") {
-      // 原点は動かさないので、下限は「非外構の最大到達点(maxExtent)を割り込まない」ことだけ
-      growth = Math.max(growth, maxExtent - startGridW);
-      growth = Math.min(growth, landMax - startGridW);
-      t.landGridW = startGridW + growth;
-      // east は原点固定なので部屋のシフトは不要
-      state.workingRooms = initialRooms.map(r => ({ ...r }));
-    } else {
-      // west: 縮める場合は「一番西の非外構部屋がx<0にならない」かつ
-      //       「グリッド上限が非外構の最大到達点を割り込まない」の両方を満たす範囲に制限
-      growth = Math.max(growth, -minOrigin, maxExtent - startGridW);
-      growth = Math.min(growth, landMax - startGridW);
-      t.landGridW = startGridW + growth;
-      state.workingRooms = initialRooms.map(r => ({ ...r, x: r.x + growth }));
-    }
+    const growth = Math.max(dGrid, MIN_GRID_SIZE - startGridW);
+    t.landGridW = startGridW + growth;
+    // east は原点固定なので部屋のシフトは不要。west は広げた分だけ全部屋をシフト。
+    state.workingRooms = (side === "east")
+      ? initialRooms.map(r => ({ ...r }))
+      : initialRooms.map(r => ({ ...r, x: r.x + growth }));
   } else {
-    const axis = "y";
-    const { minOrigin, maxExtent } = nonExteriorExtent(initialRooms, axis);
-    const landMax = (li && li.landHeightM > 0) ? li.landHeightM : Infinity;
-    let growth = dGrid;
-    if (side === "north") {
-      growth = Math.max(growth, maxExtent - startGridH);
-      growth = Math.min(growth, landMax - startGridH);
-      t.landGridH = startGridH + growth;
-      state.workingRooms = initialRooms.map(r => ({ ...r }));
-    } else {
-      growth = Math.max(growth, -minOrigin, maxExtent - startGridH);
-      growth = Math.min(growth, landMax - startGridH);
-      t.landGridH = startGridH + growth;
-      state.workingRooms = initialRooms.map(r => ({ ...r, y: r.y + growth }));
-    }
+    const growth = Math.max(dGrid, MIN_GRID_SIZE - startGridH);
+    t.landGridH = startGridH + growth;
+    state.workingRooms = (side === "north")
+      ? initialRooms.map(r => ({ ...r }))
+      : initialRooms.map(r => ({ ...r, y: r.y + growth }));
   }
   renderOutput();
   updateOptionStatus();
