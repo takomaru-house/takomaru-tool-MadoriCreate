@@ -390,6 +390,12 @@
   .edge-handle-h { cursor: ns-resize; fill: transparent; }
   .edge-handle-v:hover, .edge-handle-h:hover { fill: rgba(179, 90, 58, 0.32); }
   .edge-handle-v.dragging, .edge-handle-h.dragging { fill: rgba(179, 90, 58, 0.5); }
+  /* 建物グリッド境界(点線)のリサイズハンドル。部屋のedge-handleより太く・目立つ色にして
+     「部屋の壁」ではなく「建物全体の外周」を動かしている操作であることを分かりやすくする */
+  .grid-edge-handle-v { cursor: ew-resize; fill: transparent; }
+  .grid-edge-handle-h { cursor: ns-resize; fill: transparent; }
+  .grid-edge-handle-v:hover, .grid-edge-handle-h:hover { fill: rgba(58, 120, 179, 0.25); }
+  .grid-edge-handle-v.dragging, .grid-edge-handle-h.dragging { fill: rgba(58, 120, 179, 0.4); }
   .kitchen-rot-btn { cursor: pointer; transition: fill 0.15s; }
   .kitchen-rot-btn:hover { fill: #f3e3c5; }
   .kitchen-rot-btn:active { fill: #e7c98c; }
@@ -2274,6 +2280,17 @@ function renderFloor(rooms, floor, gridW, gridH, scale=GRID_PX, interactive=fals
         svg += `<rect class="edge-handle-h" data-edge-idx="${i}" data-floor="${floor}" x="${ex}" y="${ey}" width="${e.length * scale}" height="${HT}"/>`;
       }
     }
+    // 建物グリッド境界(点線の外周)のリサイズハンドル。東西南北4辺すべてに対応
+    // (西・南は広げた分だけ既存部屋をシフトする。onGridEdgeMouseMove参照)。
+    const GHT = 10;
+    // 東辺(垂直線, x=gridW)
+    svg += `<rect class="grid-edge-handle-v" data-grid-side="east" data-floor="${floor}" x="${paddingX + w - GHT/2}" y="${paddingY}" width="${GHT}" height="${h}"/>`;
+    // 西辺(垂直線, x=0)
+    svg += `<rect class="grid-edge-handle-v" data-grid-side="west" data-floor="${floor}" x="${paddingX - GHT/2}" y="${paddingY}" width="${GHT}" height="${h}"/>`;
+    // 北辺(水平線, y=gridH → 画面上端側)
+    svg += `<rect class="grid-edge-handle-h" data-grid-side="north" data-floor="${floor}" x="${paddingX}" y="${paddingY - GHT/2}" width="${w}" height="${GHT}"/>`;
+    // 南辺(水平線, y=0 → 画面下端側)
+    svg += `<rect class="grid-edge-handle-h" data-grid-side="south" data-floor="${floor}" x="${paddingX}" y="${paddingY + h - GHT/2}" width="${w}" height="${GHT}"/>`;
     // edge handles の後にキッチン回転ボタンを描画(常に最前面)
     for (const r of fr) {
       if (r.type === "LDK" && r.kitchen) {
@@ -3194,16 +3211,6 @@ function renderOutput() {
   if (state.candidates.length > 1) html += `<button id="nextBtn" class="secondary">別案を見る</button>`;
   html += `<button id="addRoomBtn" class="secondary">+ 部屋を追加</button>`;
   html += `<button id="resetBtn" class="secondary">編集をリセット</button>`;
-  // 建物グリッド(点線の内側=部屋を配置できる範囲)のサイズを手動変更。既定はテンプレートの設計サイズ(landGridW/H)で、
-  // 土地(landWidthM/landHeightM)より小さいことが多い。ここを広げると土地いっぱいまで部屋を配置できるようになる。
-  html += `<span class="row" style="display:inline-flex;align-items:center;gap:4px;margin-left:8px;">
-    <label style="font-size:12px;color:#666;">建物グリッド
-      <input type="number" id="gridWInput" value="${t.landGridW}" min="1" step="0.25" style="width:56px;"> ×
-      <input type="number" id="gridHInput" value="${t.landGridH}" min="1" step="0.25" style="width:56px;"> m
-    </label>
-    <button id="applyGridBtn" class="secondary" title="土地サイズ(${(state.lastInput && state.lastInput.landWidthM) || "-"}m × ${(state.lastInput && state.lastInput.landHeightM) || "-"}m)まで広げられます">適用</button>
-    <button id="fitGridToLandBtn" class="secondary">土地いっぱいに広げる</button>
-  </span>`;
   // ズーム制御
   const zoomPct = Math.round((state.zoom || 1) * 100);
   html += `<div class="zoom-ctrl">
@@ -3419,26 +3426,6 @@ function renderOutput() {
     renderOutput();
     updateOptionStatus();
   };
-  // 建物グリッドサイズの手動変更(点線の内側=部屋を配置できる範囲を広げる/狭める)
-  const applyGridBtn = document.getElementById("applyGridBtn");
-  if (applyGridBtn) applyGridBtn.onclick = () => {
-    const w = parseFloat(document.getElementById("gridWInput").value);
-    const h = parseFloat(document.getElementById("gridHInput").value);
-    if (!(w > 0) || !(h > 0)) { alert("建物グリッドのサイズは正の数で入力してください。"); return; }
-    state.workingTemplate.landGridW = w;
-    state.workingTemplate.landGridH = h;
-    renderOutput();
-    updateOptionStatus();
-  };
-  const fitGridBtn = document.getElementById("fitGridToLandBtn");
-  if (fitGridBtn) fitGridBtn.onclick = () => {
-    const li = state.lastInput;
-    if (!li || !(li.landWidthM > 0) || !(li.landHeightM > 0)) { alert("土地サイズが未設定です。"); return; }
-    state.workingTemplate.landGridW = li.landWidthM;
-    state.workingTemplate.landGridH = li.landHeightM;
-    renderOutput();
-    updateOptionStatus();
-  };
   document.getElementById("dlBtn").onclick = exportPNG;
   // 保存・読込パネル
   const slBtn = document.getElementById("saveLoadBtn");
@@ -3553,6 +3540,7 @@ function renderOutput() {
   });
 
   bindEdgeDrag();
+  bindGridEdgeDrag();
   bindRoomClick();
   bindFlipButtons();
   bindKitchenInteractions();
@@ -3839,6 +3827,124 @@ function onEdgeMouseUp() {
   dragState = null;
   document.removeEventListener("mousemove", onEdgeMouseMove);
   document.removeEventListener("mouseup", onEdgeMouseUp);
+}
+
+// ============ Grid Boundary Drag (建物グリッドの外周4辺をドラッグしてリサイズ) ============
+//
+// 東辺/北辺: グリッドの上限(landGridW/H)を広げるだけ。原点(0,0)は動かないので既存の部屋の座標はそのまま。
+// 西辺/南辺: 広げた分だけ原点が「外」へ動くのと同じことなので、既存の全部屋の x(または y) を
+//            広げた量だけ加算シフトしてから、グリッドサイズにもその量を足す。
+//            (例: 西へ1.5m広げる = landGridWに+1.5、かつ全部屋のxに+1.5。
+//             元々x=-1.5だった部屋はx=0になり、右側の部屋との相対位置関係は保たれる)
+//
+// ドラッグ中はドラッグ開始時点のスナップショット(initialRooms/startGridW/H)からの
+// 累積量として毎回計算し直す(部屋の自由ドラッグ onRoomMouseMove と同じ方式、増分を積み上げない)。
+
+let gridDragState = null;
+
+function bindGridEdgeDrag() {
+  document.querySelectorAll(".grid-edge-handle-v, .grid-edge-handle-h").forEach(h => {
+    h.addEventListener("mousedown", onGridEdgeMouseDown);
+  });
+}
+
+// axis: "x" or "y"。非外構タイプの部屋について、その軸の下限(最小座標)と上限(座標+サイズの最大値)を返す。
+// 部屋が無い場合は [0, 0] (制約なし相当)。
+function nonExteriorExtent(rooms, axis) {
+  const sizeKey = axis === "x" ? "w" : "h";
+  let minOrigin = null, maxExtent = 0;
+  for (const r of rooms) {
+    if (isExterior(r.type)) continue;
+    const o = r[axis], e = r[axis] + r[sizeKey];
+    if (minOrigin === null || o < minOrigin) minOrigin = o;
+    if (e > maxExtent) maxExtent = e;
+  }
+  return { minOrigin: minOrigin === null ? 0 : minOrigin, maxExtent };
+}
+
+function onGridEdgeMouseDown(evt) {
+  evt.preventDefault();
+  evt.stopPropagation();
+  const handle = evt.currentTarget;
+  const side = handle.getAttribute("data-grid-side"); // "east" | "west" | "north" | "south"
+  const t = state.workingTemplate;
+  if (!t) return;
+  handle.classList.add("dragging");
+  gridDragState = {
+    side, handle,
+    startMouseX: evt.clientX, startMouseY: evt.clientY,
+    startGridW: t.landGridW, startGridH: t.landGridH,
+    initialRooms: (state.workingRooms || []).map(r => ({ ...r }))
+  };
+  document.body.style.cursor = (side === "east" || side === "west") ? "ew-resize" : "ns-resize";
+  document.addEventListener("mousemove", onGridEdgeMouseMove);
+  document.addEventListener("mouseup", onGridEdgeMouseUp);
+}
+
+function onGridEdgeMouseMove(evt) {
+  if (!gridDragState) return;
+  const t = state.workingTemplate;
+  if (!t) return;
+  const { side, initialRooms, startGridW, startGridH } = gridDragState;
+  const dx = evt.clientX - gridDragState.startMouseX;
+  const dy = evt.clientY - gridDragState.startMouseY;
+  const SNAP = 4; // 1/4グリッド(22.75cm)単位
+  const _sc = currentScale();
+  const li = state.lastInput;
+  // 部屋のedge-handleと同じ符号の取り方(西・北ドラッグは符号反転)
+  let dGrid = 0;
+  if (side === "east")  dGrid =  Math.round(dx / _sc * SNAP) / SNAP;
+  if (side === "west")  dGrid = -Math.round(dx / _sc * SNAP) / SNAP;
+  if (side === "north") dGrid = -Math.round(dy / _sc * SNAP) / SNAP;
+  if (side === "south") dGrid =  Math.round(dy / _sc * SNAP) / SNAP;
+
+  if (side === "east" || side === "west") {
+    const axis = "x";
+    const { minOrigin, maxExtent } = nonExteriorExtent(initialRooms, axis);
+    const landMax = (li && li.landWidthM > 0) ? li.landWidthM : Infinity;
+    let growth = dGrid;
+    if (side === "east") {
+      // 原点は動かさないので、下限は「非外構の最大到達点(maxExtent)を割り込まない」ことだけ
+      growth = Math.max(growth, maxExtent - startGridW);
+      growth = Math.min(growth, landMax - startGridW);
+      t.landGridW = startGridW + growth;
+      // east は原点固定なので部屋のシフトは不要
+      state.workingRooms = initialRooms.map(r => ({ ...r }));
+    } else {
+      // west: 縮める場合は「一番西の非外構部屋がx<0にならない」かつ
+      //       「グリッド上限が非外構の最大到達点を割り込まない」の両方を満たす範囲に制限
+      growth = Math.max(growth, -minOrigin, maxExtent - startGridW);
+      growth = Math.min(growth, landMax - startGridW);
+      t.landGridW = startGridW + growth;
+      state.workingRooms = initialRooms.map(r => ({ ...r, x: r.x + growth }));
+    }
+  } else {
+    const axis = "y";
+    const { minOrigin, maxExtent } = nonExteriorExtent(initialRooms, axis);
+    const landMax = (li && li.landHeightM > 0) ? li.landHeightM : Infinity;
+    let growth = dGrid;
+    if (side === "north") {
+      growth = Math.max(growth, maxExtent - startGridH);
+      growth = Math.min(growth, landMax - startGridH);
+      t.landGridH = startGridH + growth;
+      state.workingRooms = initialRooms.map(r => ({ ...r }));
+    } else {
+      growth = Math.max(growth, -minOrigin, maxExtent - startGridH);
+      growth = Math.min(growth, landMax - startGridH);
+      t.landGridH = startGridH + growth;
+      state.workingRooms = initialRooms.map(r => ({ ...r, y: r.y + growth }));
+    }
+  }
+  renderOutput();
+  updateOptionStatus();
+}
+
+function onGridEdgeMouseUp() {
+  if (gridDragState && gridDragState.handle) gridDragState.handle.classList.remove("dragging");
+  document.body.style.cursor = "";
+  gridDragState = null;
+  document.removeEventListener("mousemove", onGridEdgeMouseMove);
+  document.removeEventListener("mouseup", onGridEdgeMouseUp);
 }
 
 // ============ Option Status ============
