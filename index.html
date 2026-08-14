@@ -3588,6 +3588,14 @@ function onRoomMouseMove(evt) {
     const target = next[roomDragState.startIdx];
     target.x = target.x + dGridX;
     target.y = target.y + dGridY;
+    // 建物内部の部屋(外構タイプ以外)は建物グリッド範囲外へドラッグできないようクランプする。
+    // 範囲チェック無しで自由移動できることが「はみだし」判定される部屋を作れてしまう原因だった。
+    // 外構タイプ(駐車場・テラス等)は敷地の余白(建物グリッドの外)に配置する運用のため対象外。
+    const t = state.workingTemplate;
+    if (t && !isExterior(target.type)) {
+      target.x = Math.min(Math.max(target.x, 0), t.landGridW - target.w);
+      target.y = Math.min(Math.max(target.y, 0), t.landGridH - target.h);
+    }
     state.workingRooms = next;
     renderOutput();
     updateOptionStatus();
